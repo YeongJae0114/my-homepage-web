@@ -1,4 +1,4 @@
-import { labFeatures } from "../../data/lab";
+import type { LabFeature } from "../../types/content";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
 import { Container } from "../common/Container";
@@ -10,13 +10,17 @@ const labTone = {
   live: "emerald",
 } as const;
 
-export function LabPreview() {
+type LabPreviewProps = {
+  features: LabFeature[];
+};
+
+export function LabPreview({ features }: LabPreviewProps) {
   return (
     <section id="lab" className="section-shell bg-surface-900">
       <Container>
         <SectionTitle eyebrow="Lab" title="로컬 LLM과 운영 자동화로 확장될 실험실" description="초기에는 Coming Soon 카드로 표현하고, 이후 /lab 또는 /llm 페이지와 전용 컴포넌트를 붙일 수 있게 비워둡니다." />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {labFeatures.map((feature) => (
+          {features.map((feature) => (
             <Card key={feature.id} interactive className="p-5">
               <Badge tone={labTone[feature.status]}>{feature.status}</Badge>
               <h3 className="mt-4 text-lg font-semibold text-zinc-50">{feature.name}</h3>

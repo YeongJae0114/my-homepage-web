@@ -1,16 +1,20 @@
-import { mediaItems } from "../../data/media";
+import type { ContentItem } from "../../types/content";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
 import { Container } from "../common/Container";
 import { SectionTitle } from "../common/SectionTitle";
 
-export function MediaPreview() {
+type MediaPreviewProps = {
+  items: ContentItem[];
+};
+
+export function MediaPreview({ items }: MediaPreviewProps) {
   return (
     <section id="media" className="section-shell">
       <Container>
         <SectionTitle eyebrow="Media" title="외부 콘텐츠까지 담는 스트림" description="article, note, video, external-link, project-log 타입을 하나의 ContentItem 구조로 다뤄 확장성을 확보합니다." />
         <div className="grid gap-4 lg:grid-cols-3">
-          {mediaItems.map((item) => (
+          {items.map((item) => (
             <Card key={item.id} interactive className="p-5">
               <div className="flex items-center justify-between gap-3">
                 <Badge tone={item.featured ? "emerald" : "neutral"}>{item.type}</Badge>

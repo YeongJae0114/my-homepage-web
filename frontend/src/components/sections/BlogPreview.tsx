@@ -1,10 +1,14 @@
-import { posts } from "../../data/posts";
+import type { Post } from "../../types/content";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
 import { Container } from "../common/Container";
 import { SectionTitle } from "../common/SectionTitle";
 
-export function BlogPreview() {
+type BlogPreviewProps = {
+  posts: Post[];
+};
+
+export function BlogPreview({ posts }: BlogPreviewProps) {
   return (
     <section id="blog" className="section-shell bg-surface-900">
       <Container>

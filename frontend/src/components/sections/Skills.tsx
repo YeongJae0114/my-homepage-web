@@ -1,16 +1,20 @@
-import { skillCategories } from "../../data/skills";
+import type { SkillCategory } from "../../types/content";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
 import { Container } from "../common/Container";
 import { SectionTitle } from "../common/SectionTitle";
 
-export function Skills() {
+type SkillsProps = {
+  categories: SkillCategory[];
+};
+
+export function Skills({ categories }: SkillsProps) {
   return (
     <section id="skills" className="section-shell bg-surface-900">
       <Container>
         <SectionTitle eyebrow="Skills" title="확장 가능한 기술 스택" description="카테고리와 기술 항목을 데이터로 관리해 새로운 영역이 추가되어도 컴포넌트 구조를 유지합니다." />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {skillCategories.map((category) => (
+          {categories.map((category) => (
             <Card key={category.id} interactive className="p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>

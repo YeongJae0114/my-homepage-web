@@ -1,11 +1,15 @@
-import { projects } from "../../data/projects";
+import type { Project } from "../../types/content";
 import { Badge } from "../common/Badge";
 import { Button } from "../common/Button";
 import { Card } from "../common/Card";
 import { Container } from "../common/Container";
 import { SectionTitle } from "../common/SectionTitle";
 
-export function Projects() {
+type ProjectsProps = {
+  projects: Project[];
+};
+
+export function Projects({ projects }: ProjectsProps) {
   return (
     <section id="projects" className="section-shell">
       <Container>

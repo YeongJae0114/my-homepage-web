@@ -1,12 +1,16 @@
-import { servers } from "../../data/servers";
-import { services } from "../../data/services";
+import type { Server, Service } from "../../types/infra";
 import { Container } from "../common/Container";
 import { SectionTitle } from "../common/SectionTitle";
 import { ServerStatusCard } from "../infra/ServerStatusCard";
 import { ServiceStatusCard } from "../infra/ServiceStatusCard";
 import { StatusSummary } from "../infra/StatusSummary";
 
-export function InfraStatus() {
+type InfraStatusProps = {
+  servers: Server[];
+  services: Service[];
+};
+
+export function InfraStatus({ servers, services }: InfraStatusProps) {
   return (
     <section id="infra" className="section-shell">
       <Container>
