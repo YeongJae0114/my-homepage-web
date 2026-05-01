@@ -34,7 +34,7 @@ export const projects: Project[] = [
     description: "개인 서버, reverse proxy, API 서비스를 관측하는 홈랩 모니터링 초기 구성입니다.",
     techStack: ["Nginx", "Prometheus", "Loki", "Docker"],
     outcomes: ["서비스 상태 데이터 모델링", "가용률 지표 설계", "알림 연동 준비"],
-    links: [{ label: "Status", href: "#infra" }],
+    links: [{ label: "Status", href: "/monitoring" }],
     featured: true,
   },
 ];

@@ -1,5 +1,6 @@
 import { siteConfig } from "../../config/site";
 import { navigationItems } from "../../config/navigation";
+import { AppLink } from "../common/AppLink";
 import { Container } from "../common/Container";
 
 export function Footer() {
@@ -14,9 +15,9 @@ export function Footer() {
         </div>
         <div className="flex flex-wrap gap-2">
           {navItems.map((item) => (
-            <a key={item.href} href={item.href} className="rounded-md px-3 py-2 text-sm text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-50">
+            <AppLink key={item.href} href={item.href} className="rounded-md px-3 py-2 text-sm text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-50">
               {item.label}
-            </a>
+            </AppLink>
           ))}
         </div>
       </Container>

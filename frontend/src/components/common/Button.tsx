@@ -1,5 +1,6 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { cn } from "../../utils/cn";
+import { AppLink } from "./AppLink";
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
 
@@ -18,7 +19,7 @@ const buttonVariants: Record<ButtonVariant, string> = {
 
 export function Button({ children, variant = "secondary", className, ...props }: ButtonProps) {
   return (
-    <a
+    <AppLink
       className={cn(
         "inline-flex min-h-11 items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold transition duration-200",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200",
@@ -28,6 +29,6 @@ export function Button({ children, variant = "secondary", className, ...props }:
       {...props}
     >
       {children}
-    </a>
+    </AppLink>
   );
 }

@@ -1,12 +1,15 @@
 import type { RouteConfig } from "../types/site";
 
 export const routeConfig: RouteConfig[] = [
-  { path: "/", label: "Home", enabled: true, showInNavigation: false, description: "Single page landing" },
-  { path: "/about", label: "About", enabled: false, showInNavigation: false, description: "Detailed profile page" },
-  { path: "/projects", label: "Projects", enabled: false, showInNavigation: false, description: "Project archive" },
-  { path: "/blog", label: "Blog", enabled: false, showInNavigation: false, description: "Markdown or API powered posts" },
-  { path: "/infra", label: "Infra", enabled: false, showInNavigation: false, description: "Infrastructure overview" },
-  { path: "/status", label: "Status", enabled: false, showInNavigation: false, description: "Public service status" },
+  { path: "/", label: "Home", enabled: true, showInNavigation: true, description: "Landing and platform overview" },
+  { path: "/about", label: "About", enabled: true, showInNavigation: true, description: "Detailed profile and skills" },
+  { path: "/service", label: "Service", enabled: true, showInNavigation: true, description: "Available services and integration points" },
+  { path: "/monitoring", label: "Monitoring", enabled: true, showInNavigation: true, description: "Infrastructure and service status" },
+  { path: "/project", label: "Project", enabled: true, showInNavigation: true, description: "Project archive" },
+  { path: "/blog", label: "Blog", enabled: true, showInNavigation: true, description: "Markdown or API powered posts" },
+  { path: "/projects", label: "Projects Redirect", enabled: true, showInNavigation: false, description: "Legacy project route" },
+  { path: "/infra", label: "Infra Redirect", enabled: true, showInNavigation: false, description: "Legacy infra route" },
+  { path: "/status", label: "Status Redirect", enabled: true, showInNavigation: false, description: "Legacy status route" },
   { path: "/lab", label: "Lab", enabled: false, showInNavigation: false, description: "Experimental features" },
   { path: "/llm", label: "LLM", enabled: false, showInNavigation: false, description: "Local LLM workspace" },
 ];

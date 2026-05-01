@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 import { navigationItems } from "../../config/navigation";
 import { siteConfig } from "../../config/site";
+import { usePathname } from "../../hooks/usePathname";
+import { AppLink } from "../common/AppLink";
 import { Container } from "../common/Container";
 import { cn } from "../../utils/cn";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
   const items = useMemo(
     () => navigationItems.filter((item) => item.enabled).sort((a, b) => a.order - b.order),
     [],
@@ -15,19 +18,31 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-surface-950/[0.78] backdrop-blur-xl">
       <Container>
         <nav className="flex min-h-16 items-center justify-between" aria-label="Primary navigation">
-          <a href="#top" className="flex items-center gap-3 font-semibold text-zinc-50" aria-label="Go to top">
+          <AppLink href="/" className="flex items-center gap-3 font-semibold text-zinc-50" aria-label="Go to home">
             <span className="grid h-9 w-9 place-items-center rounded-md border border-emerald-300/25 bg-emerald-300/10 font-mono text-sm text-emerald-100">
               Y
             </span>
             <span className="hidden sm:block">{siteConfig.name}</span>
-          </a>
+          </AppLink>
 
           <div className="hidden items-center gap-1 md:flex">
-            {items.map((item) => (
-              <a key={item.href} href={item.href} className="rounded-md px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-white/[0.06] hover:text-zinc-50">
-                {item.label}
-              </a>
-            ))}
+            {items.map((item) => {
+              const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+
+              return (
+                <AppLink
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition hover:bg-white/[0.06] hover:text-zinc-50",
+                    isActive ? "bg-white/[0.07] text-emerald-100" : "text-zinc-400",
+                  )}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {item.label}
+                </AppLink>
+              );
+            })}
           </div>
 
           <button
@@ -49,14 +64,14 @@ export function Header() {
         {isOpen ? (
           <div id="mobile-menu" className="grid gap-1 border-t border-white/10 py-3 md:hidden">
             {items.map((item) => (
-              <a
+              <AppLink
                 key={item.href}
                 href={item.href}
                 className="rounded-md px-3 py-3 text-sm font-medium text-zinc-300 hover:bg-white/[0.06] hover:text-zinc-50"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}
-              </a>
+              </AppLink>
             ))}
           </div>
         ) : null}

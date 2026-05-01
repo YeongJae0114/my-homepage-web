@@ -13,8 +13,8 @@ export const siteConfig: SiteConfig = {
   ctaLinks: [
     { label: "GitHub", href: "https://github.com/example", variant: "primary", external: true },
     { label: "Blog", href: "https://blog.example.com", variant: "secondary", external: true },
-    { label: "Infra Status", href: "#infra", variant: "secondary" },
-    { label: "Contact", href: "#contact", variant: "ghost" },
+    { label: "Monitoring", href: "/monitoring", variant: "secondary" },
+    { label: "Service", href: "/service", variant: "ghost" },
   ],
   contactLinks: [
     {
