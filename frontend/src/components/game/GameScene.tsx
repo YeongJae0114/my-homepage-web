@@ -39,6 +39,7 @@ function findActiveZone(map: MapDefinition, position: Position) {
 
 export function GameScene() {
   const navigate = useNavigate();
+  const sceneRef = useRef<HTMLDivElement | null>(null);
   const [selectedMapId, setSelectedMapId] = useState(MAP_DATA[0].id);
   const selectedMap = useMemo(() => MAP_DATA.find((map) => map.id === selectedMapId) ?? MAP_DATA[0], [selectedMapId]);
   const [position, setPosition] = useState<Position>({ x: selectedMap.startX, y: selectedMap.startY });
@@ -46,8 +47,32 @@ export function GameScene() {
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [sceneSize, setSceneSize] = useState({ width: 0, height: 0 });
   const activeDirection = useRef<Direction | null>(null);
   const activeZoneId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+
+    if (!scene) {
+      return;
+    }
+
+    const updateSceneSize = () => {
+      const rect = scene.getBoundingClientRect();
+      setSceneSize({
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      });
+    };
+
+    updateSceneSize();
+
+    const observer = new ResizeObserver(updateSceneSize);
+    observer.observe(scene);
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     Object.values(characterFrames)
@@ -164,8 +189,11 @@ export function GameScene() {
   return (
     <section className="game-home fixed inset-0 overflow-hidden bg-surface-950 text-zinc-50">
       <div className="absolute inset-0 grid place-items-center p-3 sm:p-5">
-        <div className="relative aspect-video max-h-[100vh] w-full max-w-[100vw] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow">
-          <img src={selectedMap.image} alt={selectedMap.name} draggable={false} className="absolute inset-0 h-full w-full select-none object-cover" />
+        <div
+          ref={sceneRef}
+          className="relative aspect-square w-full max-w-[calc(100vmin-1.5rem)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[calc(100vmin-2.5rem)]"
+        >
+          <img src={selectedMap.image} alt={selectedMap.name} draggable={false} className="absolute inset-0 h-full w-full select-none object-contain" />
           {selectedMap.zones.map((zone) => (
             <div
               key={zone.id}
@@ -178,7 +206,7 @@ export function GameScene() {
               {zone.label}
             </div>
           ))}
-          <Character position={position} direction={direction} frame={frameSequence[frameIndex]} />
+          {sceneSize.width > 0 && <Character position={position} direction={direction} frame={frameSequence[frameIndex]} sceneSize={sceneSize} />}
         </div>
       </div>
 
