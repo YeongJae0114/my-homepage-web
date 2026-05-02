@@ -7,6 +7,7 @@ import { MobileJoypad } from "./MobileJoypad";
 import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, characterFrames, type Direction, type MapDefinition, type Position } from "./mapData";
 
 const MOVE_STEP = 0.25;
+const VERTICAL_MOVE_STEP = MOVE_STEP * (MAP_ROWS / MAP_COLUMNS);
 const MOVE_INTERVAL_MS = 70;
 const WALK_FRAME_INTERVAL_MS = 130;
 const ZONE_TRIGGER_RADIUS = 0.28;
@@ -14,15 +15,15 @@ const frameSequence = [0, 1, 0, 2];
 
 function getNextPosition(position: Position, direction: Direction): Position {
   const delta = {
-    down: { x: 0, y: MOVE_STEP },
-    up: { x: 0, y: -MOVE_STEP },
+    down: { x: 0, y: VERTICAL_MOVE_STEP },
+    up: { x: 0, y: -VERTICAL_MOVE_STEP },
     left: { x: -MOVE_STEP, y: 0 },
     right: { x: MOVE_STEP, y: 0 },
   }[direction];
 
   return {
-    x: Number((position.x + delta.x).toFixed(2)),
-    y: Number((position.y + delta.y).toFixed(2)),
+    x: Number((position.x + delta.x).toFixed(3)),
+    y: Number((position.y + delta.y).toFixed(3)),
   };
 }
 
