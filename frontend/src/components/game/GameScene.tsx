@@ -8,10 +8,11 @@ import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, characterFrames, type Direction, type 
 
 const MOVE_STEP = 0.25;
 const VERTICAL_MOVE_STEP = MOVE_STEP * (MAP_ROWS / MAP_COLUMNS);
-const MOVE_INTERVAL_MS = 70;
-const IDLE_FRAME_DELAY_MS = 110;
+const MOVE_INTERVAL_MS = 58;
+const WALK_FRAME_INTERVAL_MS = 95;
+const IDLE_FRAME_DELAY_MS = 170;
 const ZONE_TRIGGER_RADIUS = 0.28;
-const frameSequence = [0, 1, 0, 2];
+const frameSequence = [1, 0, 2, 0];
 
 function getNextPosition(position: Position, direction: Direction): Position {
   const delta = {
@@ -115,7 +116,6 @@ export function GameScene() {
           activeZoneId.current = null;
         }
 
-        setFrameIndex((current) => (current + 1) % frameSequence.length);
         return next;
       });
     },
@@ -126,6 +126,7 @@ export function GameScene() {
     (nextDirection: Direction) => {
       clearIdleFrameTimer();
       activeDirection.current = nextDirection;
+      setFrameIndex(0);
       setIsMoving(true);
       move(nextDirection);
     },
@@ -154,6 +155,10 @@ export function GameScene() {
       return;
     }
 
+    const walkTimer = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % frameSequence.length);
+    }, WALK_FRAME_INTERVAL_MS);
+
     const moveTimer = window.setInterval(() => {
       if (activeDirection.current) {
         move(activeDirection.current);
@@ -161,6 +166,7 @@ export function GameScene() {
     }, MOVE_INTERVAL_MS);
 
     return () => {
+      window.clearInterval(walkTimer);
       window.clearInterval(moveTimer);
     };
   }, [isMoving, move]);
@@ -203,7 +209,7 @@ export function GameScene() {
       <div className="absolute inset-0 grid place-items-center p-3 sm:p-5">
         <div
           ref={sceneRef}
-          className="relative aspect-square w-full max-w-[calc(100vmin-1.5rem)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[calc(100vmin-2.5rem)]"
+          className="relative aspect-square w-full max-w-[min(86vmin,760px)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[min(82vmin,780px)]"
         >
           <img src={selectedMap.image} alt={selectedMap.name} draggable={false} className="absolute inset-0 h-full w-full select-none object-contain" />
           {selectedMap.zones.map((zone) => (
