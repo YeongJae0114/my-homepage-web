@@ -30,26 +30,12 @@ export function BlogPreview({
   return (
     <section id="blog" className="section-shell bg-surface-900">
       <Container>
-        <div className="mb-10 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="mb-10">
           <SectionTitle
             eyebrow="Blog"
             title="기술 기록과 트러블슈팅 노트"
             description="Velog GraphQL API에서 가져온 최신 글을 1단 리스트로 보여줍니다."
           />
-          {profile ? (
-            <Card className="flex min-w-0 items-center gap-4 p-4 lg:max-w-sm">
-              {profile.thumbnail ? (
-                <img
-                  src={profile.thumbnail}
-                  alt={`${profile.displayName} profile`}
-                  className="h-14 w-14 rounded-md border border-white/10 object-cover"
-                />
-              ) : null}
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-zinc-50">{profile.displayName}</p>
-              </div>
-            </Card>
-          ) : null}
         </div>
 
         <div className="grid gap-4">
