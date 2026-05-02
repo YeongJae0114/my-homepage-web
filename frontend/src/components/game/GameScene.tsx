@@ -14,6 +14,8 @@ const ZONE_TRIGGER_RADIUS = 0.28;
 const IDLE_FRAME = 0;
 const DEFAULT_SCENE_SIZE = { width: 600, height: 600 };
 const MIN_LOADING_MS = 700;
+const READY_REVEAL_DELAY_MS = 180;
+const LOADING_PROGRESS_INTERVAL_MS = 45;
 const walkFrameSequence = [1, 0, 2, 0];
 
 function getNextPosition(position: Position, direction: Direction): Position {
@@ -134,14 +136,29 @@ export function GameScene() {
 
   useEffect(() => {
     let isActive = true;
+    let targetProgress = 8;
     const startedAt = window.performance.now();
     const sources = getGameAssetSources();
     let loadedCount = 0;
 
+    setLoadingProgress(targetProgress);
+
+    const progressTimer = window.setInterval(() => {
+      setLoadingProgress((current) => {
+        const cappedTarget = Math.min(targetProgress, 96);
+
+        if (current >= cappedTarget) {
+          return current;
+        }
+
+        return Math.min(cappedTarget, current + Math.max(1, Math.ceil((cappedTarget - current) * 0.28)));
+      });
+    }, LOADING_PROGRESS_INTERVAL_MS);
+
     const markLoaded = () => {
       loadedCount += 1;
       if (isActive) {
-        setLoadingProgress(Math.round((loadedCount / sources.length) * 100));
+        targetProgress = Math.max(targetProgress, Math.round((loadedCount / sources.length) * 96));
       }
     };
 
@@ -157,15 +174,21 @@ export function GameScene() {
 
       window.setTimeout(() => {
         if (isActive) {
+          window.clearInterval(progressTimer);
           setLoadingProgress(100);
           resetForMap(MAP_DATA[0]);
-          setIsGameReady(true);
+          window.setTimeout(() => {
+            if (isActive) {
+              setIsGameReady(true);
+            }
+          }, READY_REVEAL_DELAY_MS);
         }
       }, remaining);
     });
 
     return () => {
       isActive = false;
+      window.clearInterval(progressTimer);
     };
   }, [resetForMap]);
 
