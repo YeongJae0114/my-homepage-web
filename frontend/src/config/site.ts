@@ -19,6 +19,12 @@ export const siteConfig: SiteConfig = {
   ],
   contactLinks: [
     {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/zerojae",
+      description: "경력과 네트워크 프로필",
+      external: true,
+    },
+    {
       label: "Email",
       href: "mailto:zerojae175@gmail.com",
       description: "협업, 채용, 기술 대화 제안",
@@ -33,12 +39,6 @@ export const siteConfig: SiteConfig = {
       label: "Blog",
       href: "https://velog.io/@yjl8628/posts",
       description: "트러블슈팅과 백엔드 학습 노트",
-      external: true,
-    },
-    {
-      label: "LinkedIn",
-      href: "https://www.linkedin.com/in/zerojae",
-      description: "경력과 네트워크 프로필",
       external: true,
     },
   ],
