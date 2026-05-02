@@ -47,7 +47,6 @@ export function BlogPreview({
               ) : null}
               <div className="min-w-0">
                 <p className="truncate font-semibold text-zinc-50">{profile.displayName}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{profile.title}</p>
               </div>
             </Card>
           ) : null}
