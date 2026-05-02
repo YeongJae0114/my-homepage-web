@@ -10,14 +10,6 @@ type CharacterProps = {
   };
 };
 
-const allCharacterFrameLayers = Object.entries(characterFrames).flatMap(([entryDirection, frames]) =>
-  frames.map((src, index) => ({
-    direction: entryDirection as Direction,
-    index,
-    src,
-  })),
-);
-
 function roundToEven(value: number) {
   return Math.max(2, Math.round(value / 2) * 2);
 }
@@ -29,6 +21,7 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
   const height = roundToEven(width * 1.68);
   const x = Math.round((position.x + 0.5) * cellWidth - width / 2);
   const y = Math.round((position.y + 0.5) * cellHeight - height * 0.7);
+  const activeFrameSrc = characterFrames[direction][frame] ?? characterFrames[direction][0];
 
   return (
     <div
@@ -41,26 +34,15 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
         transform: `translate3d(${x}px, ${y}px, 0)`,
       }}
     >
-      {allCharacterFrameLayers.map((layer) => {
-        const isActive = layer.direction === direction && layer.index === frame;
-
-        return (
-          <img
-            key={layer.src}
-            src={layer.src}
-            alt=""
-            aria-hidden="true"
-            decoding="async"
-            draggable={false}
-            className="absolute inset-0 h-full w-full object-contain"
-            style={{
-              opacity: isActive ? 1 : 0,
-              zIndex: isActive ? 1 : 0,
-              imageRendering: "auto",
-            }}
-          />
-        );
-      })}
+      <img
+        src={activeFrameSrc}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-contain"
+        style={{ imageRendering: "auto" }}
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ const DEFAULT_SCENE_SIZE = { width: 600, height: 600 };
 const MIN_LOADING_MS = 700;
 const READY_REVEAL_DELAY_MS = 180;
 const LOADING_PROGRESS_INTERVAL_MS = 45;
+const ASSET_PRELOAD_CONCURRENCY = 2;
 const walkFrameSequence = [1, 0, 2, 0];
 
 function getNextPosition(position: Position, direction: Direction): Position {
@@ -51,6 +52,22 @@ function getGameAssetSources() {
   return [...MAP_DATA.map((map) => map.image), ...Object.values(characterFrames).flat()];
 }
 
+function getInitialGameAssetSources(map: MapDefinition) {
+  return [
+    map.image,
+    characterFrames.down[0],
+    characterFrames.up[0],
+    characterFrames.left[0],
+    characterFrames.right[0],
+  ];
+}
+
+function getRemainingGameAssetSources(initialSources: string[]) {
+  const initialSourceSet = new Set(initialSources);
+
+  return getGameAssetSources().filter((src) => !initialSourceSet.has(src));
+}
+
 async function preloadImage(src: string) {
   const image = new Image();
   image.decoding = "async";
@@ -65,6 +82,26 @@ async function preloadImage(src: string) {
     image.onload = () => resolve();
     image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
   });
+}
+
+async function preloadImages(
+  sources: string[],
+  onSettled: () => void,
+  concurrency = ASSET_PRELOAD_CONCURRENCY,
+) {
+  let index = 0;
+
+  async function worker() {
+    while (index < sources.length) {
+      const currentSource = sources[index];
+      index += 1;
+
+      await preloadImage(currentSource).catch(() => undefined);
+      onSettled();
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, sources.length) }, worker));
 }
 
 export function GameScene() {
@@ -138,7 +175,7 @@ export function GameScene() {
     let isActive = true;
     let targetProgress = 8;
     const startedAt = window.performance.now();
-    const sources = getGameAssetSources();
+    const sources = getInitialGameAssetSources(MAP_DATA[0]);
     let loadedCount = 0;
 
     setLoadingProgress(targetProgress);
@@ -162,13 +199,7 @@ export function GameScene() {
       }
     };
 
-    Promise.all(
-      sources.map((src) =>
-        preloadImage(src)
-          .catch(() => undefined)
-          .finally(markLoaded),
-      ),
-    ).then(() => {
+    preloadImages(sources, markLoaded).then(() => {
       const elapsed = window.performance.now() - startedAt;
       const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
 
@@ -180,6 +211,7 @@ export function GameScene() {
           window.setTimeout(() => {
             if (isActive) {
               setIsGameReady(true);
+              preloadImages(getRemainingGameAssetSources(sources), () => undefined, 1);
             }
           }, READY_REVEAL_DELAY_MS);
         }
