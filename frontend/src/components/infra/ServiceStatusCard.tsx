@@ -10,12 +10,14 @@ type ServiceStatusCardProps = {
 export function ServiceStatusCard({ service }: ServiceStatusCardProps) {
   return (
     <Card className="p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-zinc-50">{service.name}</h3>
-          <p className="mt-1 font-mono text-xs text-zinc-500">{service.endpoint}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="break-words font-semibold text-zinc-50">{service.name}</h3>
+          <p className="mt-1 break-all font-mono text-xs text-zinc-500">{service.endpoint}</p>
         </div>
-        <StatusBadge status={service.status} />
+        <div className="shrink-0">
+          <StatusBadge status={service.status} />
+        </div>
       </div>
       <p className="mt-3 text-sm leading-6 text-zinc-400">{service.description}</p>
       <div className="mt-4 flex flex-wrap gap-2">

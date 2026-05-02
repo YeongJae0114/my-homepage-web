@@ -13,12 +13,14 @@ type ServerStatusCardProps = {
 export function ServerStatusCard({ server }: ServerStatusCardProps) {
   return (
     <Card interactive className={cn("p-5", statusStyles[server.status].cardClassName)}>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="font-mono text-xs uppercase text-zinc-500">{server.role} / {server.environment}</p>
-          <h3 className="mt-2 text-lg font-semibold text-zinc-50">{server.name}</h3>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="break-words font-mono text-xs uppercase text-zinc-500">{server.role} / {server.environment}</p>
+          <h3 className="mt-2 break-words text-lg font-semibold text-zinc-50">{server.name}</h3>
         </div>
-        <StatusBadge status={server.status} />
+        <div className="shrink-0">
+          <StatusBadge status={server.status} />
+        </div>
       </div>
       <p className="mt-3 min-h-12 text-sm leading-6 text-zinc-400">{server.description}</p>
       <div className="mt-5 grid grid-cols-2 gap-3 text-sm">

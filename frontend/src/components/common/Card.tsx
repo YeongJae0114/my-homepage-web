@@ -10,7 +10,7 @@ export function Card({ children, className, interactive = false, ...props }: Car
   return (
     <div
       className={cn(
-        "rounded-lg border border-white/10 bg-white/[0.045] shadow-glow backdrop-blur",
+        "min-w-0 rounded-lg border border-white/10 bg-white/[0.045] shadow-glow backdrop-blur",
         interactive && "transition duration-200 hover:-translate-y-1 hover:border-cyan-200/25 hover:bg-white/[0.07]",
         className,
       )}

@@ -33,7 +33,7 @@ export function BlogPreview({
             description="Velog GraphQL API에서 가져온 최신 글을 1단 리스트로 보여줍니다."
           />
           {profile ? (
-            <Card className="flex items-center gap-4 p-4">
+            <Card className="flex min-w-0 items-center gap-4 p-4 lg:max-w-sm">
               {profile.thumbnail ? (
                 <img
                   src={profile.thumbnail}
@@ -41,9 +41,9 @@ export function BlogPreview({
                   className="h-14 w-14 rounded-md border border-white/10 object-cover"
                 />
               ) : null}
-              <div>
-                <p className="font-semibold text-zinc-50">{profile.displayName}</p>
-                <p className="mt-1 text-sm text-zinc-400">{profile.title}</p>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-zinc-50">{profile.displayName}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{profile.title}</p>
               </div>
             </Card>
           ) : null}
@@ -53,9 +53,9 @@ export function BlogPreview({
           {posts.map((post) => (
             <a key={post.id} href={post.url} className="block">
               <Card interactive className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-start">
-                <div>
+                <div className="min-w-0">
                   <p className="font-mono text-xs text-zinc-500">{post.publishedAt}</p>
-                  <h3 className="mt-3 text-xl font-semibold leading-snug text-zinc-50">{post.title}</h3>
+                  <h3 className="mt-3 break-words text-lg font-semibold leading-snug text-zinc-50 sm:text-xl">{post.title}</h3>
                   <p className="mt-3 text-sm leading-6 text-zinc-400">{post.summary}</p>
                 </div>
                 <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">

@@ -9,12 +9,12 @@ type MapSelectorProps = {
 export function MapSelector({ maps, selectedMapId, onSelect }: MapSelectorProps) {
   return (
     <label
-      className="absolute left-4 top-4 z-30 max-w-[calc(100%-2rem)] rounded-lg border border-white/10 bg-surface-950/75 px-3 py-2 text-sm text-zinc-200 shadow-glow backdrop-blur"
+      className="absolute left-3 top-3 z-30 max-w-[calc(100%-1.5rem)] rounded-lg border border-white/10 bg-surface-950/75 px-2.5 py-2 text-sm text-zinc-200 shadow-glow backdrop-blur sm:left-4 sm:top-4 sm:max-w-[calc(100%-2rem)] sm:px-3"
       onClick={(event) => event.stopPropagation()}
       onMouseDown={(event) => event.stopPropagation()}
       onTouchStart={(event) => event.stopPropagation()}
     >
-      <span className="mr-2 text-xs font-semibold uppercase text-zinc-500">Map</span>
+      <span className="mr-2 hidden text-xs font-semibold uppercase text-zinc-500 sm:inline">Map</span>
       <select
         value={selectedMapId}
         onChange={(event) => onSelect(event.target.value)}

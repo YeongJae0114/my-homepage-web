@@ -17,12 +17,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-surface-950/[0.78] backdrop-blur-xl">
       <Container>
-        <nav className="flex min-h-16 items-center justify-between" aria-label="Primary navigation">
-          <AppLink href="/" className="flex items-center gap-3 font-semibold text-zinc-50" aria-label="Go to home">
+        <nav className="flex min-h-16 min-w-0 items-center justify-between gap-3" aria-label="Primary navigation">
+          <AppLink href="/" className="flex min-w-0 items-center gap-3 font-semibold text-zinc-50" aria-label="Go to home">
             <span className="grid h-9 w-9 place-items-center rounded-md border border-emerald-300/25 bg-emerald-300/10 font-mono text-sm text-emerald-100">
               Y
             </span>
-            <span className="hidden sm:block">{siteConfig.name}</span>
+            <span className="hidden max-w-48 truncate lg:block">{siteConfig.name}</span>
           </AppLink>
 
           <div className="hidden items-center gap-1 md:flex">
@@ -34,7 +34,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition hover:bg-white/[0.06] hover:text-zinc-50",
+                    "rounded-md px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.06] hover:text-zinc-50 lg:px-3",
                     isActive ? "bg-white/[0.07] text-emerald-100" : "text-zinc-400",
                   )}
                   aria-current={isActive ? "page" : undefined}

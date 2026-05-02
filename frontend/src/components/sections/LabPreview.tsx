@@ -23,7 +23,7 @@ export function LabPreview({ features }: LabPreviewProps) {
           {features.map((feature) => (
             <Card key={feature.id} interactive className="p-5">
               <Badge tone={labTone[feature.status]}>{feature.status}</Badge>
-              <h3 className="mt-4 text-lg font-semibold text-zinc-50">{feature.name}</h3>
+              <h3 className="mt-4 break-words text-lg font-semibold text-zinc-50">{feature.name}</h3>
               <p className="mt-3 text-sm leading-6 text-zinc-400">{feature.description}</p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {feature.tags.map((tag) => (

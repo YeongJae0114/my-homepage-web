@@ -17,8 +17,8 @@ export function Projects({ projects }: ProjectsProps) {
         <div className="grid gap-5 md:grid-cols-2">
           {projects.map((project) => (
             <Card key={project.id} interactive className="flex h-full flex-col p-6">
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="text-xl font-semibold text-zinc-50">{project.name}</h3>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h3 className="min-w-0 break-words text-lg font-semibold text-zinc-50 sm:text-xl">{project.name}</h3>
                 {project.featured ? <Badge tone="emerald">featured</Badge> : null}
               </div>
               <p className="mt-3 text-sm leading-6 text-zinc-400">{project.description}</p>
@@ -35,7 +35,7 @@ export function Projects({ projects }: ProjectsProps) {
                   </li>
                 ))}
               </ul>
-              <div className="mt-auto flex flex-wrap gap-3 pt-6">
+              <div className="mt-auto flex flex-wrap gap-x-4 gap-y-2 pt-6">
                 {project.links.map((link) => (
                   <Button key={link.label} href={link.href} variant="ghost" className="px-0 hover:bg-transparent hover:text-emerald-100">
                     {link.label}

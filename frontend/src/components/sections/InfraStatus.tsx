@@ -21,7 +21,7 @@ export function InfraStatus({ servers, services }: InfraStatusProps) {
             <ServerStatusCard key={server.id} server={server} />
           ))}
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
           {services.map((service) => (
             <ServiceStatusCard key={service.id} service={service} />
           ))}

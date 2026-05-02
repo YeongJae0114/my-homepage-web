@@ -338,7 +338,7 @@ export function GameScene() {
     >
       {!isGameReady && (
         <div className="absolute inset-0 z-40 grid place-items-center bg-surface-950 text-zinc-50">
-          <div className="w-[min(82vw,360px)] rounded-lg border border-white/10 bg-surface-900/80 p-5 shadow-glow backdrop-blur">
+          <div className="w-[min(82vw,360px)] rounded-lg border border-white/10 bg-surface-900/80 p-4 shadow-glow backdrop-blur sm:p-5">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300">Loading game assets</p>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-emerald-300 transition-[width] duration-200 ease-out" style={{ width: `${loadingProgress}%` }} />
@@ -351,13 +351,13 @@ export function GameScene() {
       <div className={`absolute inset-0 grid place-items-center p-3 transition-opacity duration-200 sm:p-4 ${isGameReady ? "opacity-100" : "opacity-0"}`}>
         <div
           ref={sceneRef}
-          className="relative aspect-square h-[min(88%,560px)] max-h-[calc(100%-1rem)] max-w-[calc(100%-1rem)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow"
+          className="relative aspect-square h-[min(82%,520px)] max-h-[calc(100%-1rem)] max-w-[calc(100%-1rem)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:h-[min(88%,560px)]"
         >
           <img src={selectedMap.image} alt={selectedMap.name} draggable={false} className="absolute inset-0 h-full w-full select-none object-contain" />
           {selectedMap.zones.map((zone) => (
             <div
               key={zone.id}
-              className="absolute z-10 grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-emerald-200/45 bg-emerald-300/18 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-[0_0_24px_rgba(110,231,183,.35)] animate-pulse"
+              className="absolute z-10 grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-emerald-200/45 bg-emerald-300/18 px-2 py-1 text-[10px] font-semibold text-emerald-50 shadow-[0_0_24px_rgba(110,231,183,.35)] animate-pulse sm:px-3 sm:text-xs"
               style={{
                 left: `${(zone.x + 0.5) * (100 / MAP_COLUMNS)}%`,
                 top: `${(zone.y + 0.5) * (100 / MAP_ROWS)}%`,

@@ -16,9 +16,9 @@ export function Skills({ categories }: SkillsProps) {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {categories.map((category) => (
             <Card key={category.id} interactive className="p-5">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-zinc-50">{category.title}</h3>
+                  <h3 className="break-words text-lg font-semibold text-zinc-50">{category.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">{category.description}</p>
                 </div>
               </div>

@@ -8,8 +8,8 @@ export function Footer() {
   return (
     <footer className="border-t border-white/10 bg-surface-950 py-10">
       <Container>
-        <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
-          <div>
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+          <div className="min-w-0">
             <p className="font-semibold text-zinc-50">{siteConfig.name}</p>
             <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{siteConfig.description}</p>
           </div>

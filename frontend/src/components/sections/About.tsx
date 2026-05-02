@@ -13,8 +13,8 @@ export function About({ profile }: AboutProps) {
       <Container>
         <SectionTitle eyebrow="About" title="운영까지 생각하는 백엔드 개발자" description={profile.intro} />
         <div className="grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
-          <div className="border-l border-emerald-300/30 pl-5">
-            <p className="text-2xl font-semibold leading-snug text-zinc-50">{profile.highlight}</p>
+          <div className="min-w-0 border-l border-emerald-300/30 pl-4 sm:pl-5">
+            <p className="break-words text-xl font-semibold leading-snug text-zinc-50 sm:text-2xl">{profile.highlight}</p>
             <p className="mt-4 text-sm leading-7 text-zinc-400">{profile.secondaryDescription}</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">

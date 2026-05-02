@@ -4,10 +4,10 @@ import { Badge } from "../common/Badge";
 export function ModelStatusCard() {
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
           <p className="font-mono text-xs uppercase text-zinc-500">model status</p>
-          <h3 className="mt-2 text-lg font-semibold text-zinc-50">Local model not connected</h3>
+          <h3 className="mt-2 break-words text-lg font-semibold text-zinc-50">Local model not connected</h3>
         </div>
         <Badge>planned</Badge>
       </div>

@@ -14,13 +14,13 @@ const controls: Array<{ direction: Direction; label: string; className: string }
 
 export function MobileJoypad({ onStart, onStop }: MobileJoypadProps) {
   return (
-    <div className="absolute bottom-4 left-1/2 z-30 grid w-44 -translate-x-1/2 touch-none grid-cols-3 grid-rows-2 gap-2 md:hidden">
+    <div className="absolute bottom-3 left-1/2 z-30 grid w-36 -translate-x-1/2 touch-none grid-cols-3 grid-rows-2 gap-1.5 sm:w-44 sm:gap-2 md:hidden">
       {controls.map((control) => (
         <button
           key={control.direction}
           type="button"
           aria-label={`${control.label} 이동`}
-          className={`${control.className} h-14 rounded-lg border border-white/15 bg-surface-950/70 text-sm font-bold text-zinc-100 shadow-glow backdrop-blur active:bg-emerald-300/25`}
+          className={`${control.className} h-11 rounded-lg border border-white/15 bg-surface-950/70 text-sm font-bold text-zinc-100 shadow-glow backdrop-blur active:bg-emerald-300/25 sm:h-14`}
           onContextMenu={(event) => event.preventDefault()}
           onMouseDown={(event) => {
             event.preventDefault();

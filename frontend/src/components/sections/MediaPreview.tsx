@@ -16,11 +16,11 @@ export function MediaPreview({ items }: MediaPreviewProps) {
         <div className="grid gap-4 lg:grid-cols-3">
           {items.map((item) => (
             <Card key={item.id} interactive className="p-5">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <Badge tone={item.featured ? "emerald" : "neutral"}>{item.type}</Badge>
-                <span className="font-mono text-xs text-zinc-500">{item.source}</span>
+                <span className="break-all font-mono text-xs text-zinc-500">{item.source}</span>
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-zinc-50">{item.title}</h3>
+              <h3 className="mt-4 break-words text-lg font-semibold text-zinc-50">{item.title}</h3>
               <p className="mt-3 text-sm leading-6 text-zinc-400">{item.description}</p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
