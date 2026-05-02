@@ -86,23 +86,23 @@ export const MAP_DATA: MapDefinition[] = [
 
 export const characterFrames: Record<Direction, string[]> = {
   down: [
-    "/images/character/01_down_idle.svg",
-    "/images/character/02_down_left_foot.svg",
-    "/images/character/03_down_right_foot.svg",
+    "/images/character/01_front_idle.svg",
+    "/images/character/02_front_walk_a.svg",
+    "/images/character/03_front_walk_b.svg",
   ],
   up: [
-    "/images/character/04_up_idle.svg",
-    "/images/character/05_up_left_foot.svg",
-    "/images/character/06_up_right_foot.svg",
+    "/images/character/04_back_idle.svg",
+    "/images/character/05_back_walk_a.svg",
+    "/images/character/06_back_walk_b.svg",
   ],
   right: [
-    "/images/character/07_right_idle.svg",
-    "/images/character/08_right_left_foot.svg",
-    "/images/character/09_right_right_foot.svg",
+    "/images/character/07_side_right_idle.svg",
+    "/images/character/08_side_right_walk_a.svg",
+    "/images/character/09_side_right_walk_b.svg",
   ],
   left: [
-    "/images/character/10_left_idle.svg",
-    "/images/character/11_left_left_foot.svg",
-    "/images/character/12_left_right_foot.svg",
+    "/images/character/10_side_left_idle.svg",
+    "/images/character/11_side_left_walk_a.svg",
+    "/images/character/12_side_left_walk_b.svg",
   ],
 };
