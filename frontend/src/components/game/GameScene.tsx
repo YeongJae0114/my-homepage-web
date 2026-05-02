@@ -14,6 +14,7 @@ const IDLE_FRAME_DELAY_MS = 170;
 const ZONE_TRIGGER_RADIUS = 0.28;
 const IDLE_FRAME = 0;
 const DEFAULT_SCENE_SIZE = { width: 600, height: 600 };
+const MIN_LOADING_MS = 700;
 const walkFrameSequence = [1, 0, 2, 0];
 
 function getNextPosition(position: Position, direction: Direction): Position {
@@ -45,6 +46,26 @@ function getStartPosition(map: MapDefinition): Position {
   return { x: map.startX, y: map.startY };
 }
 
+function getGameAssetSources() {
+  return [...MAP_DATA.map((map) => map.image), ...Object.values(characterFrames).flat()];
+}
+
+async function preloadImage(src: string) {
+  const image = new Image();
+  image.decoding = "async";
+  image.src = src;
+
+  if (image.decode) {
+    await image.decode();
+    return;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+  });
+}
+
 export function GameScene() {
   const navigate = useNavigate();
   const sceneRef = useRef<HTMLDivElement | null>(null);
@@ -55,6 +76,8 @@ export function GameScene() {
   const [isMoving, setIsMoving] = useState(false);
   const [frame, setFrame] = useState(IDLE_FRAME);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isGameReady, setIsGameReady] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [sceneSize, setSceneSize] = useState(DEFAULT_SCENE_SIZE);
   const activeDirection = useRef<Direction | null>(null);
   const activeZoneId = useRef<string | null>(null);
@@ -111,13 +134,41 @@ export function GameScene() {
   }, []);
 
   useEffect(() => {
-    Object.values(characterFrames)
-      .flat()
-      .forEach((src) => {
-        const image = new Image();
-        image.src = src;
-      });
-  }, []);
+    let isActive = true;
+    const startedAt = window.performance.now();
+    const sources = getGameAssetSources();
+    let loadedCount = 0;
+
+    const markLoaded = () => {
+      loadedCount += 1;
+      if (isActive) {
+        setLoadingProgress(Math.round((loadedCount / sources.length) * 100));
+      }
+    };
+
+    Promise.all(
+      sources.map((src) =>
+        preloadImage(src)
+          .catch(() => undefined)
+          .finally(markLoaded),
+      ),
+    ).then(() => {
+      const elapsed = window.performance.now() - startedAt;
+      const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+
+      window.setTimeout(() => {
+        if (isActive) {
+          setLoadingProgress(100);
+          resetForMap(MAP_DATA[0]);
+          setIsGameReady(true);
+        }
+      }, remaining);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [resetForMap]);
 
   useEffect(() => clearIdleFrameTimer, [clearIdleFrameTimer]);
 
@@ -213,6 +264,10 @@ export function GameScene() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isGameReady) {
+        return;
+      }
+
       const keyMap: Partial<Record<string, Direction>> = {
         ArrowDown: "down",
         ArrowUp: "up",
@@ -242,11 +297,23 @@ export function GameScene() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [startMoving, stopMoving]);
+  }, [isGameReady, startMoving, stopMoving]);
 
   return (
     <section className="game-home fixed inset-0 overflow-hidden bg-surface-950 text-zinc-50">
-      <div className="absolute inset-0 grid place-items-center p-3 sm:p-5">
+      {!isGameReady && (
+        <div className="absolute inset-0 z-50 grid place-items-center bg-surface-950 text-zinc-50">
+          <div className="w-[min(82vw,360px)] rounded-lg border border-white/10 bg-surface-900/80 p-5 shadow-glow backdrop-blur">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300">Loading game assets</p>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-emerald-300 transition-[width] duration-200 ease-out" style={{ width: `${loadingProgress}%` }} />
+            </div>
+            <p className="mt-3 text-sm text-zinc-400">캐릭터와 맵을 준비하는 중입니다. {loadingProgress}%</p>
+          </div>
+        </div>
+      )}
+
+      <div className={`absolute inset-0 grid place-items-center p-3 transition-opacity duration-200 sm:p-5 ${isGameReady ? "opacity-100" : "opacity-0"}`}>
         <div
           ref={sceneRef}
           className="relative aspect-square w-full max-w-[min(70vmin,600px)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[min(68vmin,620px)]"
@@ -268,7 +335,7 @@ export function GameScene() {
         </div>
       </div>
 
-      <MapSelector maps={MAP_DATA} selectedMapId={selectedMap.id} onSelect={handleMapSelect} />
+      {isGameReady && <MapSelector maps={MAP_DATA} selectedMapId={selectedMap.id} onSelect={handleMapSelect} />}
       <button
         type="button"
         className="fixed right-4 top-4 z-40 rounded-lg border border-white/10 bg-surface-950/75 px-4 py-2 text-sm font-semibold text-zinc-100 shadow-glow backdrop-blur transition hover:bg-white/[0.08]"
@@ -276,10 +343,12 @@ export function GameScene() {
       >
         일반 메뉴로 보기
       </button>
-      <div className="fixed bottom-5 left-5 z-30 hidden rounded-lg border border-white/10 bg-surface-950/65 px-3 py-2 font-mono text-xs text-zinc-400 backdrop-blur md:block">
-        Arrow / WASD로 이동
-      </div>
-      <MobileJoypad onStart={startMoving} onStop={stopMoving} />
+      {isGameReady && (
+        <div className="fixed bottom-5 left-5 z-30 hidden rounded-lg border border-white/10 bg-surface-950/65 px-3 py-2 font-mono text-xs text-zinc-400 backdrop-blur md:block">
+          Arrow / WASD로 이동
+        </div>
+      )}
+      {isGameReady && <MobileJoypad onStart={startMoving} onStop={stopMoving} />}
       <MenuModal isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </section>
   );
