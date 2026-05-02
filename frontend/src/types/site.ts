@@ -23,6 +23,7 @@ export type SiteConfig = {
   email: string;
   githubUrl: string;
   blogUrl: string;
+  linkedinUrl: string;
   ctaLinks: CtaLink[];
   contactLinks: ContactLink[];
 };
