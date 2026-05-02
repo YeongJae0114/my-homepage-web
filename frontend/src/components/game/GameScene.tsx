@@ -9,7 +9,7 @@ import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, characterFrames, type Direction, type 
 const MOVE_STEP = 0.25;
 const VERTICAL_MOVE_STEP = MOVE_STEP * (MAP_ROWS / MAP_COLUMNS);
 const MOVE_INTERVAL_MS = 70;
-const WALK_FRAME_INTERVAL_MS = 130;
+const IDLE_FRAME_DELAY_MS = 110;
 const ZONE_TRIGGER_RADIUS = 0.28;
 const frameSequence = [0, 1, 0, 2];
 
@@ -51,6 +51,14 @@ export function GameScene() {
   const [sceneSize, setSceneSize] = useState({ width: 0, height: 0 });
   const activeDirection = useRef<Direction | null>(null);
   const activeZoneId = useRef<string | null>(null);
+  const idleFrameTimer = useRef<number | null>(null);
+
+  const clearIdleFrameTimer = useCallback(() => {
+    if (idleFrameTimer.current) {
+      window.clearTimeout(idleFrameTimer.current);
+      idleFrameTimer.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const scene = sceneRef.current;
@@ -84,6 +92,8 @@ export function GameScene() {
       });
   }, []);
 
+  useEffect(() => clearIdleFrameTimer, [clearIdleFrameTimer]);
+
   const move = useCallback(
     (nextDirection: Direction) => {
       setDirection(nextDirection);
@@ -105,6 +115,7 @@ export function GameScene() {
           activeZoneId.current = null;
         }
 
+        setFrameIndex((current) => (current + 1) % frameSequence.length);
         return next;
       });
     },
@@ -113,18 +124,23 @@ export function GameScene() {
 
   const startMoving = useCallback(
     (nextDirection: Direction) => {
+      clearIdleFrameTimer();
       activeDirection.current = nextDirection;
       setIsMoving(true);
       move(nextDirection);
     },
-    [move],
+    [clearIdleFrameTimer, move],
   );
 
   const stopMoving = useCallback(() => {
     activeDirection.current = null;
     setIsMoving(false);
-    setFrameIndex(0);
-  }, []);
+    clearIdleFrameTimer();
+    idleFrameTimer.current = window.setTimeout(() => {
+      setFrameIndex(0);
+      idleFrameTimer.current = null;
+    }, IDLE_FRAME_DELAY_MS);
+  }, [clearIdleFrameTimer]);
 
   useEffect(() => {
     setPosition({ x: selectedMap.startX, y: selectedMap.startY });
@@ -138,10 +154,6 @@ export function GameScene() {
       return;
     }
 
-    const walkTimer = window.setInterval(() => {
-      setFrameIndex((current) => (current + 1) % frameSequence.length);
-    }, WALK_FRAME_INTERVAL_MS);
-
     const moveTimer = window.setInterval(() => {
       if (activeDirection.current) {
         move(activeDirection.current);
@@ -149,7 +161,6 @@ export function GameScene() {
     }, MOVE_INTERVAL_MS);
 
     return () => {
-      window.clearInterval(walkTimer);
       window.clearInterval(moveTimer);
     };
   }, [isMoving, move]);
