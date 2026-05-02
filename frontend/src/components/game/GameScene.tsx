@@ -40,12 +40,16 @@ function findActiveZone(map: MapDefinition, position: Position) {
   return map.zones.find((zone) => Math.hypot(zone.x - position.x, zone.y - position.y) <= ZONE_TRIGGER_RADIUS);
 }
 
+function getStartPosition(map: MapDefinition): Position {
+  return { x: map.startX, y: map.startY };
+}
+
 export function GameScene() {
   const navigate = useNavigate();
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const [selectedMapId, setSelectedMapId] = useState(MAP_DATA[0].id);
   const selectedMap = useMemo(() => MAP_DATA.find((map) => map.id === selectedMapId) ?? MAP_DATA[0], [selectedMapId]);
-  const [position, setPosition] = useState<Position>({ x: selectedMap.startX, y: selectedMap.startY });
+  const [position, setPosition] = useState<Position>(() => getStartPosition(selectedMap));
   const [direction, setDirection] = useState<Direction>("down");
   const [isMoving, setIsMoving] = useState(false);
   const [frame, setFrame] = useState(IDLE_FRAME);
@@ -62,6 +66,20 @@ export function GameScene() {
       idleFrameTimer.current = null;
     }
   }, []);
+
+  const resetForMap = useCallback(
+    (map: MapDefinition) => {
+      clearIdleFrameTimer();
+      activeDirection.current = null;
+      activeZoneId.current = null;
+      walkFrameIndex.current = 0;
+      setIsMoving(false);
+      setFrame(IDLE_FRAME);
+      setDirection("down");
+      setPosition(getStartPosition(map));
+    },
+    [clearIdleFrameTimer],
+  );
 
   useEffect(() => {
     const scene = sceneRef.current;
@@ -148,11 +166,22 @@ export function GameScene() {
   }, [clearIdleFrameTimer]);
 
   useEffect(() => {
-    setPosition({ x: selectedMap.startX, y: selectedMap.startY });
-    setDirection("down");
-    activeZoneId.current = null;
-    stopMoving();
-  }, [selectedMap, stopMoving]);
+    resetForMap(selectedMap);
+  }, [selectedMap, resetForMap]);
+
+  const handleMapSelect = useCallback(
+    (mapId: string) => {
+      const nextMap = MAP_DATA.find((map) => map.id === mapId);
+
+      if (!nextMap || nextMap.id === selectedMapId) {
+        return;
+      }
+
+      resetForMap(nextMap);
+      setSelectedMapId(nextMap.id);
+    },
+    [resetForMap, selectedMapId],
+  );
 
   useEffect(() => {
     if (!isMoving) {
@@ -229,11 +258,11 @@ export function GameScene() {
               {zone.label}
             </div>
           ))}
-          {sceneSize.width > 0 && <Character position={position} direction={direction} frame={frame} sceneSize={sceneSize} />}
+          {sceneSize.width > 0 && <Character key={selectedMap.id} position={position} direction={direction} frame={frame} sceneSize={sceneSize} />}
         </div>
       </div>
 
-      <MapSelector maps={MAP_DATA} selectedMapId={selectedMap.id} onSelect={setSelectedMapId} />
+      <MapSelector maps={MAP_DATA} selectedMapId={selectedMap.id} onSelect={handleMapSelect} />
       <button
         type="button"
         className="fixed right-4 top-4 z-40 rounded-lg border border-white/10 bg-surface-950/75 px-4 py-2 text-sm font-semibold text-zinc-100 shadow-glow backdrop-blur transition hover:bg-white/[0.08]"
