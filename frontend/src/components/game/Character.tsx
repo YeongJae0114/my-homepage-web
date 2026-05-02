@@ -42,9 +42,10 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
           aria-hidden="true"
           decoding="async"
           draggable={false}
-          className="absolute inset-0 h-full w-full object-contain transition-opacity duration-75 ease-linear"
+          className="absolute inset-0 h-full w-full object-contain"
           style={{
             opacity: index === frame ? 1 : 0,
+            zIndex: index === frame ? 1 : 0,
             imageRendering: "auto",
           }}
         />
