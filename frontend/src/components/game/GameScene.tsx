@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Character } from "./Character";
 import { MapSelector } from "./MapSelector";
@@ -68,6 +68,7 @@ async function preloadImage(src: string) {
 
 export function GameScene() {
   const navigate = useNavigate();
+  const gameRootRef = useRef<HTMLElement | null>(null);
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const [selectedMapId, setSelectedMapId] = useState(MAP_DATA[0].id);
   const selectedMap = useMemo(() => MAP_DATA.find((map) => map.id === selectedMapId) ?? MAP_DATA[0], [selectedMapId]);
@@ -262,8 +263,8 @@ export function GameScene() {
     };
   }, [isMoving, move]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
       if (!isGameReady) {
         return;
       }
@@ -280,29 +281,42 @@ export function GameScene() {
       };
       const nextDirection = keyMap[event.key];
 
+      if (event.key === " ") {
+        event.preventDefault();
+        return;
+      }
+
       if (!nextDirection || activeDirection.current === nextDirection) {
         return;
       }
 
       event.preventDefault();
       startMoving(nextDirection);
-    };
+    },
+    [isGameReady, startMoving],
+  );
 
-    const handleKeyUp = () => stopMoving();
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [isGameReady, startMoving, stopMoving]);
+  const handleKeyUp = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "s", "w", "a", "d", " "].includes(event.key)) {
+        event.preventDefault();
+        stopMoving();
+      }
+    },
+    [stopMoving],
+  );
 
   return (
-    <section className="game-home fixed inset-0 overflow-hidden bg-surface-950 text-zinc-50">
+    <section
+      ref={gameRootRef}
+      className="game-home relative h-full min-h-[320px] overflow-hidden bg-surface-950 text-zinc-50 outline-none"
+      tabIndex={0}
+      onClick={() => gameRootRef.current?.focus()}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+    >
       {!isGameReady && (
-        <div className="absolute inset-0 z-50 grid place-items-center bg-surface-950 text-zinc-50">
+        <div className="absolute inset-0 z-40 grid place-items-center bg-surface-950 text-zinc-50">
           <div className="w-[min(82vw,360px)] rounded-lg border border-white/10 bg-surface-900/80 p-5 shadow-glow backdrop-blur">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300">Loading game assets</p>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
@@ -313,10 +327,10 @@ export function GameScene() {
         </div>
       )}
 
-      <div className={`absolute inset-0 grid place-items-center p-3 transition-opacity duration-200 sm:p-5 ${isGameReady ? "opacity-100" : "opacity-0"}`}>
+      <div className={`absolute inset-0 grid place-items-center p-3 transition-opacity duration-200 sm:p-4 ${isGameReady ? "opacity-100" : "opacity-0"}`}>
         <div
           ref={sceneRef}
-          className="relative aspect-square w-full max-w-[min(70vmin,600px)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[min(68vmin,620px)]"
+          className="relative aspect-square h-[min(88%,560px)] max-h-[calc(100%-1rem)] max-w-[calc(100%-1rem)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow"
         >
           <img src={selectedMap.image} alt={selectedMap.name} draggable={false} className="absolute inset-0 h-full w-full select-none object-contain" />
           {selectedMap.zones.map((zone) => (
@@ -338,14 +352,14 @@ export function GameScene() {
       {isGameReady && <MapSelector maps={MAP_DATA} selectedMapId={selectedMap.id} onSelect={handleMapSelect} />}
       <button
         type="button"
-        className="fixed right-4 top-4 z-40 rounded-lg border border-white/10 bg-surface-950/75 px-4 py-2 text-sm font-semibold text-zinc-100 shadow-glow backdrop-blur transition hover:bg-white/[0.08]"
+        className="absolute right-4 top-4 z-30 rounded-lg border border-white/10 bg-surface-950/75 px-4 py-2 text-sm font-semibold text-zinc-100 shadow-glow backdrop-blur transition hover:bg-white/[0.08]"
         onClick={() => setIsMenuOpen(true)}
       >
         일반 메뉴로 보기
       </button>
       {isGameReady && (
-        <div className="fixed bottom-5 left-5 z-30 hidden rounded-lg border border-white/10 bg-surface-950/65 px-3 py-2 font-mono text-xs text-zinc-400 backdrop-blur md:block">
-          Arrow / WASD로 이동
+        <div className="absolute bottom-4 left-4 z-30 hidden rounded-lg border border-white/10 bg-surface-950/65 px-3 py-2 font-mono text-xs text-zinc-400 backdrop-blur md:block">
+          Click game, then Arrow / WASD
         </div>
       )}
       {isGameReady && <MobileJoypad onStart={startMoving} onStop={stopMoving} />}

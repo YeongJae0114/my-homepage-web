@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
 import { AboutPage } from "./pages/AboutPage";
@@ -9,12 +9,9 @@ import { ProjectsPage } from "./pages/ProjectsPage";
 import { ServicePage } from "./pages/ServicePage";
 
 function AppShell() {
-  const { pathname } = useLocation();
-  const isHome = pathname === "/";
-
   return (
     <div className="min-h-screen bg-surface-950 text-zinc-50">
-      {isHome ? null : <Header />}
+      <Header />
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -29,7 +26,7 @@ function AppShell() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      {isHome ? null : <Footer />}
+      <Footer />
     </div>
   );
 }

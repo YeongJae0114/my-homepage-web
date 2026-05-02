@@ -14,7 +14,7 @@ const controls: Array<{ direction: Direction; label: string; className: string }
 
 export function MobileJoypad({ onStart, onStop }: MobileJoypadProps) {
   return (
-    <div className="fixed inset-x-0 bottom-5 z-50 mx-auto grid w-44 touch-none grid-cols-3 grid-rows-2 gap-2 md:hidden">
+    <div className="absolute bottom-4 left-1/2 z-30 grid w-44 -translate-x-1/2 touch-none grid-cols-3 grid-rows-2 gap-2 md:hidden">
       {controls.map((control) => (
         <button
           key={control.direction}
