@@ -209,7 +209,7 @@ export function GameScene() {
       <div className="absolute inset-0 grid place-items-center p-3 sm:p-5">
         <div
           ref={sceneRef}
-          className="relative aspect-square w-full max-w-[min(86vmin,760px)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[min(82vmin,780px)]"
+          className="relative aspect-square w-full max-w-[min(78vmin,680px)] overflow-hidden rounded-lg border border-white/10 bg-surface-900 shadow-glow sm:max-w-[min(74vmin,700px)]"
         >
           <img src={selectedMap.image} alt={selectedMap.name} draggable={false} className="absolute inset-0 h-full w-full select-none object-contain" />
           {selectedMap.zones.map((zone) => (
