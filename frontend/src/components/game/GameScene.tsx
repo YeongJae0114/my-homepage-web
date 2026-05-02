@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Character } from "./Character";
 import { MapSelector } from "./MapSelector";
@@ -13,6 +13,7 @@ const WALK_FRAME_INTERVAL_MS = 95;
 const IDLE_FRAME_DELAY_MS = 170;
 const ZONE_TRIGGER_RADIUS = 0.28;
 const IDLE_FRAME = 0;
+const DEFAULT_SCENE_SIZE = { width: 600, height: 600 };
 const walkFrameSequence = [1, 0, 2, 0];
 
 function getNextPosition(position: Position, direction: Direction): Position {
@@ -54,7 +55,7 @@ export function GameScene() {
   const [isMoving, setIsMoving] = useState(false);
   const [frame, setFrame] = useState(IDLE_FRAME);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [sceneSize, setSceneSize] = useState({ width: 0, height: 0 });
+  const [sceneSize, setSceneSize] = useState(DEFAULT_SCENE_SIZE);
   const activeDirection = useRef<Direction | null>(null);
   const activeZoneId = useRef<string | null>(null);
   const idleFrameTimer = useRef<number | null>(null);
@@ -81,7 +82,7 @@ export function GameScene() {
     [clearIdleFrameTimer],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const scene = sceneRef.current;
 
     if (!scene) {
@@ -90,6 +91,11 @@ export function GameScene() {
 
     const updateSceneSize = () => {
       const rect = scene.getBoundingClientRect();
+
+      if (rect.width === 0 || rect.height === 0) {
+        return;
+      }
+
       setSceneSize({
         width: Math.round(rect.width),
         height: Math.round(rect.height),
@@ -258,7 +264,7 @@ export function GameScene() {
               {zone.label}
             </div>
           ))}
-          {sceneSize.width > 0 && <Character key={selectedMap.id} position={position} direction={direction} frame={frame} sceneSize={sceneSize} />}
+          <Character key={selectedMap.id} position={position} direction={direction} frame={frame} sceneSize={sceneSize} />
         </div>
       </div>
 
