@@ -21,6 +21,16 @@ body {
   color: #f7f7ef;
 }
 
+.game-home,
+.game-home * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-home {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 body::selection {
   background: rgba(52, 211, 153, 0.28);
 }

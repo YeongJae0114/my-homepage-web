@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { navigationItems } from "../../config/navigation";
 import { siteConfig } from "../../config/site";
-import { usePathname } from "../../hooks/usePathname";
 import { AppLink } from "../common/AppLink";
 import { Container } from "../common/Container";
 import { cn } from "../../utils/cn";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const items = useMemo(
     () => navigationItems.filter((item) => item.enabled).sort((a, b) => a.order - b.order),
     [],

@@ -1,6 +1,6 @@
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
-import { usePathname } from "./hooks/usePathname";
 import { AboutPage } from "./pages/AboutPage";
 import { BlogPage } from "./pages/BlogPage";
 import { HomePage } from "./pages/HomePage";
@@ -8,38 +8,32 @@ import { MonitoringPage } from "./pages/MonitoringPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ServicePage } from "./pages/ServicePage";
 
-export default function App() {
-  const pathname = usePathname();
-
-  const Page = (() => {
-    switch (pathname) {
-      case "/":
-        return HomePage;
-      case "/about":
-        return AboutPage;
-      case "/service":
-        return ServicePage;
-      case "/monitoring":
-      case "/infra":
-      case "/status":
-        return MonitoringPage;
-      case "/project":
-      case "/projects":
-        return ProjectsPage;
-      case "/blog":
-        return BlogPage;
-      default:
-        return HomePage;
-    }
-  })();
+function AppShell() {
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
 
   return (
     <div className="min-h-screen bg-surface-950 text-zinc-50">
-      <Header />
+      {isHome ? null : <Header />}
       <main>
-        <Page />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/service" element={<ServicePage />} />
+          <Route path="/monitoring" element={<MonitoringPage />} />
+          <Route path="/infra" element={<Navigate to="/monitoring" replace />} />
+          <Route path="/status" element={<Navigate to="/monitoring" replace />} />
+          <Route path="/project" element={<ProjectsPage />} />
+          <Route path="/projects" element={<Navigate to="/project" replace />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
-      <Footer />
+      {isHome ? null : <Footer />}
     </div>
   );
+}
+
+export default function App() {
+  return <AppShell />;
 }
