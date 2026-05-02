@@ -10,12 +10,19 @@ type CharacterProps = {
   };
 };
 
+const allCharacterFrameLayers = Object.entries(characterFrames).flatMap(([entryDirection, frames]) =>
+  frames.map((src, index) => ({
+    direction: entryDirection as Direction,
+    index,
+    src,
+  })),
+);
+
 function roundToEven(value: number) {
   return Math.max(2, Math.round(value / 2) * 2);
 }
 
 export function Character({ position, direction, frame, sceneSize }: CharacterProps) {
-  const frames = characterFrames[direction];
   const cellWidth = sceneSize.width / MAP_COLUMNS;
   const cellHeight = sceneSize.height / MAP_ROWS;
   const width = roundToEven(cellWidth * 1.25);
@@ -34,22 +41,26 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
         transform: `translate3d(${x}px, ${y}px, 0)`,
       }}
     >
-      {frames.map((src, index) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-          draggable={false}
-          className="absolute inset-0 h-full w-full object-contain"
-          style={{
-            opacity: index === frame ? 1 : 0,
-            zIndex: index === frame ? 1 : 0,
-            imageRendering: "auto",
-          }}
-        />
-      ))}
+      {allCharacterFrameLayers.map((layer) => {
+        const isActive = layer.direction === direction && layer.index === frame;
+
+        return (
+          <img
+            key={layer.src}
+            src={layer.src}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-contain"
+            style={{
+              opacity: isActive ? 1 : 0,
+              zIndex: isActive ? 1 : 0,
+              imageRendering: "auto",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
