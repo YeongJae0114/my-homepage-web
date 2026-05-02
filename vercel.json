@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/velog/graphql", "destination": "https://v2.velog.io/graphql" },
-    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
-  ]
-}
