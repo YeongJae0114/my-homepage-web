@@ -1,24 +1,37 @@
 import { siteConfig } from "../../config/site";
-import { navigationItems } from "../../config/navigation";
 import { AppLink } from "../common/AppLink";
 import { Container } from "../common/Container";
 
 export function Footer() {
-  const navItems = navigationItems.filter((item) => item.enabled).sort((a, b) => a.order - b.order);
+  const year = new Date().getFullYear();
 
   return (
     <footer className="border-t border-white/10 bg-surface-950 py-10">
-      <Container className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="font-semibold text-zinc-50">{siteConfig.name}</p>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{siteConfig.description}</p>
+      <Container>
+        <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
+          <div>
+            <p className="font-semibold text-zinc-50">{siteConfig.name}</p>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{siteConfig.description}</p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 md:justify-end">
+            {siteConfig.contactLinks.map((link) => (
+              <AppLink
+                key={link.href}
+                href={link.href}
+                className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 transition hover:border-emerald-300/35 hover:bg-white/[0.06] hover:text-zinc-50"
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noreferrer" : undefined}
+              >
+                {link.label}
+              </AppLink>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {navItems.map((item) => (
-            <AppLink key={item.href} href={item.href} className="rounded-md px-3 py-2 text-sm text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-50">
-              {item.label}
-            </AppLink>
-          ))}
+
+        <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {year} {siteConfig.name}. All rights reserved.</p>
+          <p>Built with React, TypeScript, and Tailwind CSS.</p>
         </div>
       </Container>
     </footer>
