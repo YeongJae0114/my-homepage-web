@@ -21,7 +21,7 @@ export function Hero({ hero }: HeroProps) {
           <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-300">{hero.description}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             {hero.ctaLinks.map((link) => (
-              <Button key={link.label} href={link.href} variant={link.variant} target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
+              <Button key={link.label} href={link.href} variant="primary" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
                 {link.label}
               </Button>
             ))}

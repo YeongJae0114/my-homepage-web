@@ -250,7 +250,7 @@ type HomeApiResponse = {
       {
         "label": "Monitoring",
         "href": "/monitoring",
-        "variant": "secondary"
+        "variant": "primary"
       }
     ],
     "highlights": [
