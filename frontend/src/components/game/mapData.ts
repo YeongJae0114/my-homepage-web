@@ -41,8 +41,8 @@ export const MAP_DATA: MapDefinition[] = [
     id: "studio-apartment",
     name: "Studio Apartment",
     image: "/images/map/studio-apartment.png",
-    startX: 7,
-    startY: 5,
+    startX: 7.5,
+    startY: 4,
     grid: baseGrid,
     zones: [
       { id: "about", label: "About", path: "/about", x: 3, y: 2 },
@@ -56,8 +56,8 @@ export const MAP_DATA: MapDefinition[] = [
     id: "tech-garden",
     name: "Tech Garden",
     image: "/images/map/tech-garden.png",
-    startX: 8,
-    startY: 6,
+    startX: 7.5,
+    startY: 4,
     grid: baseGrid,
     zones: [
       { id: "about", label: "About", path: "/about", x: 2, y: 4 },
@@ -71,7 +71,7 @@ export const MAP_DATA: MapDefinition[] = [
     id: "technological-hub",
     name: "Technological Hub",
     image: "/images/map/technological-hub.png",
-    startX: 7,
+    startX: 7.5,
     startY: 4,
     grid: baseGrid,
     zones: [

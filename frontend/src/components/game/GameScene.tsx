@@ -12,7 +12,8 @@ const MOVE_INTERVAL_MS = 58;
 const WALK_FRAME_INTERVAL_MS = 95;
 const IDLE_FRAME_DELAY_MS = 170;
 const ZONE_TRIGGER_RADIUS = 0.28;
-const frameSequence = [1, 0, 2, 0];
+const IDLE_FRAME = 0;
+const walkFrameSequence = [1, 0, 2, 0];
 
 function getNextPosition(position: Position, direction: Direction): Position {
   const delta = {
@@ -47,12 +48,13 @@ export function GameScene() {
   const [position, setPosition] = useState<Position>({ x: selectedMap.startX, y: selectedMap.startY });
   const [direction, setDirection] = useState<Direction>("down");
   const [isMoving, setIsMoving] = useState(false);
-  const [frameIndex, setFrameIndex] = useState(0);
+  const [frame, setFrame] = useState(IDLE_FRAME);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [sceneSize, setSceneSize] = useState({ width: 0, height: 0 });
   const activeDirection = useRef<Direction | null>(null);
   const activeZoneId = useRef<string | null>(null);
   const idleFrameTimer = useRef<number | null>(null);
+  const walkFrameIndex = useRef(0);
 
   const clearIdleFrameTimer = useCallback(() => {
     if (idleFrameTimer.current) {
@@ -126,7 +128,8 @@ export function GameScene() {
     (nextDirection: Direction) => {
       clearIdleFrameTimer();
       activeDirection.current = nextDirection;
-      setFrameIndex(0);
+      walkFrameIndex.current = 0;
+      setFrame(walkFrameSequence[walkFrameIndex.current]);
       setIsMoving(true);
       move(nextDirection);
     },
@@ -138,7 +141,8 @@ export function GameScene() {
     setIsMoving(false);
     clearIdleFrameTimer();
     idleFrameTimer.current = window.setTimeout(() => {
-      setFrameIndex(0);
+      walkFrameIndex.current = 0;
+      setFrame(IDLE_FRAME);
       idleFrameTimer.current = null;
     }, IDLE_FRAME_DELAY_MS);
   }, [clearIdleFrameTimer]);
@@ -156,7 +160,8 @@ export function GameScene() {
     }
 
     const walkTimer = window.setInterval(() => {
-      setFrameIndex((current) => (current + 1) % frameSequence.length);
+      walkFrameIndex.current = (walkFrameIndex.current + 1) % walkFrameSequence.length;
+      setFrame(walkFrameSequence[walkFrameIndex.current]);
     }, WALK_FRAME_INTERVAL_MS);
 
     const moveTimer = window.setInterval(() => {
@@ -224,7 +229,7 @@ export function GameScene() {
               {zone.label}
             </div>
           ))}
-          {sceneSize.width > 0 && <Character position={position} direction={direction} frame={frameSequence[frameIndex]} sceneSize={sceneSize} />}
+          {sceneSize.width > 0 && <Character position={position} direction={direction} frame={frame} sceneSize={sceneSize} />}
         </div>
       </div>
 

@@ -15,7 +15,7 @@ function roundToEven(value: number) {
 }
 
 export function Character({ position, direction, frame, sceneSize }: CharacterProps) {
-  const image = characterFrames[direction][frame];
+  const frames = characterFrames[direction];
   const cellWidth = sceneSize.width / MAP_COLUMNS;
   const cellHeight = sceneSize.height / MAP_ROWS;
   const width = roundToEven(cellWidth * 1.25);
@@ -24,18 +24,31 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
   const y = Math.round((position.y + 0.5) * cellHeight - height * 0.7);
 
   return (
-    <img
-      src={image}
-      alt="Player character"
-      decoding="async"
-      draggable={false}
-      className="pointer-events-none absolute left-0 top-0 z-20 select-none object-contain transition-transform duration-75 ease-linear will-change-transform"
+    <div
+      aria-label="Player character"
+      className="pointer-events-none absolute left-0 top-0 z-20 select-none transition-transform duration-75 ease-linear will-change-transform"
+      role="img"
       style={{
         width,
         height,
         transform: `translate3d(${x}px, ${y}px, 0)`,
-        imageRendering: "auto",
       }}
-    />
+    >
+      {frames.map((src, index) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          draggable={false}
+          className="absolute inset-0 h-full w-full object-contain transition-opacity duration-75 ease-linear"
+          style={{
+            opacity: index === frame ? 1 : 0,
+            imageRendering: "auto",
+          }}
+        />
+      ))}
+    </div>
   );
 }
