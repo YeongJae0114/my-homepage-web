@@ -11,14 +11,18 @@ export function Character({ position, direction, frame }: CharacterProps) {
 
   return (
     <img
+      key={image}
       src={image}
       alt="Player character"
+      decoding="async"
       draggable={false}
-      className="pointer-events-none absolute z-20 w-[7%] select-none transition-all duration-200 ease-linear"
+      className="pointer-events-none absolute z-20 h-[18%] w-[10%] select-none object-contain transition-[left,top] duration-75 ease-linear"
       style={{
         left: `${(position.x + 0.5) * (100 / MAP_COLUMNS)}%`,
         top: `${(position.y + 0.5) * (100 / MAP_ROWS)}%`,
         transform: "translate(-50%, -70%)",
+        imageRendering: "pixelated",
+        filter: "drop-shadow(0 8px 10px rgba(0, 0, 0, 0.38))",
       }}
     />
   );

@@ -4,26 +4,37 @@ import { Character } from "./Character";
 import { MapSelector } from "./MapSelector";
 import { MenuModal } from "./MenuModal";
 import { MobileJoypad } from "./MobileJoypad";
-import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, type Direction, type MapDefinition, type Position } from "./mapData";
+import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, characterFrames, type Direction, type MapDefinition, type Position } from "./mapData";
 
+const MOVE_STEP = 0.25;
+const MOVE_INTERVAL_MS = 70;
+const WALK_FRAME_INTERVAL_MS = 130;
+const ZONE_TRIGGER_RADIUS = 0.28;
 const frameSequence = [0, 1, 0, 2];
 
 function getNextPosition(position: Position, direction: Direction): Position {
   const delta = {
-    down: { x: 0, y: 1 },
-    up: { x: 0, y: -1 },
-    left: { x: -1, y: 0 },
-    right: { x: 1, y: 0 },
+    down: { x: 0, y: MOVE_STEP },
+    up: { x: 0, y: -MOVE_STEP },
+    left: { x: -MOVE_STEP, y: 0 },
+    right: { x: MOVE_STEP, y: 0 },
   }[direction];
 
   return {
-    x: position.x + delta.x,
-    y: position.y + delta.y,
+    x: Number((position.x + delta.x).toFixed(2)),
+    y: Number((position.y + delta.y).toFixed(2)),
   };
 }
 
 function canMove(map: MapDefinition, position: Position) {
-  return position.y >= 0 && position.y < MAP_ROWS && position.x >= 0 && position.x < MAP_COLUMNS && map.grid[position.y]?.[position.x] === 0;
+  const gridX = Math.round(position.x);
+  const gridY = Math.round(position.y);
+
+  return gridY >= 0 && gridY < MAP_ROWS && gridX >= 0 && gridX < MAP_COLUMNS && map.grid[gridY]?.[gridX] === 0;
+}
+
+function findActiveZone(map: MapDefinition, position: Position) {
+  return map.zones.find((zone) => Math.hypot(zone.x - position.x, zone.y - position.y) <= ZONE_TRIGGER_RADIUS);
 }
 
 export function GameScene() {
@@ -36,6 +47,16 @@ export function GameScene() {
   const [frameIndex, setFrameIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const activeDirection = useRef<Direction | null>(null);
+  const activeZoneId = useRef<string | null>(null);
+
+  useEffect(() => {
+    Object.values(characterFrames)
+      .flat()
+      .forEach((src) => {
+        const image = new Image();
+        image.src = src;
+      });
+  }, []);
 
   const move = useCallback(
     (nextDirection: Direction) => {
@@ -47,10 +68,15 @@ export function GameScene() {
           return current;
         }
 
-        const zone = selectedMap.zones.find((item) => item.x === next.x && item.y === next.y);
+        const zone = findActiveZone(selectedMap, next);
 
-        if (zone) {
+        if (zone && activeZoneId.current !== zone.id) {
+          activeZoneId.current = zone.id;
           window.setTimeout(() => navigate(zone.path), 160);
+        }
+
+        if (!zone) {
+          activeZoneId.current = null;
         }
 
         return next;
@@ -77,6 +103,7 @@ export function GameScene() {
   useEffect(() => {
     setPosition({ x: selectedMap.startX, y: selectedMap.startY });
     setDirection("down");
+    activeZoneId.current = null;
     stopMoving();
   }, [selectedMap, stopMoving]);
 
@@ -87,13 +114,13 @@ export function GameScene() {
 
     const walkTimer = window.setInterval(() => {
       setFrameIndex((current) => (current + 1) % frameSequence.length);
-    }, 150);
+    }, WALK_FRAME_INTERVAL_MS);
 
     const moveTimer = window.setInterval(() => {
       if (activeDirection.current) {
         move(activeDirection.current);
       }
-    }, 200);
+    }, MOVE_INTERVAL_MS);
 
     return () => {
       window.clearInterval(walkTimer);
