@@ -3,7 +3,7 @@ import { AppLink } from "../common/AppLink";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
 
-type ServiceLinkCardProps = {
+type ServiceCardProps = {
   service: Service;
 };
 
@@ -11,7 +11,7 @@ function isNavigableEndpoint(endpoint: string) {
   return endpoint.startsWith("http") || endpoint.startsWith("/");
 }
 
-export function ServiceLinkCard({ service }: ServiceLinkCardProps) {
+export function ServiceCard({ service }: ServiceCardProps) {
   const isNavigable = isNavigableEndpoint(service.endpoint);
   const content = (
     <Card interactive={isNavigable} className="h-full p-5">

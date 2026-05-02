@@ -1,7 +1,6 @@
 import { Container } from "../components/common/Container";
 import { SectionTitle } from "../components/common/SectionTitle";
-import { ServiceLinkCard } from "../components/infra/ServiceLinkCard";
-import { MediaPreview } from "../components/sections/MediaPreview";
+import { ServiceCard } from "../components/service/ServiceCard";
 import { useServicePageData } from "../hooks/usePageData";
 
 export function ServicePage() {
@@ -18,12 +17,11 @@ export function ServicePage() {
           />
           <div className="grid gap-4 lg:grid-cols-3">
             {data.services.map((service) => (
-              <ServiceLinkCard key={service.id} service={service} />
+              <ServiceCard key={service.id} service={service} />
             ))}
           </div>
         </Container>
       </section>
-      <MediaPreview items={data.mediaItems} />
     </>
   );
 }
