@@ -62,6 +62,8 @@ Access-Control-Allow-Headers: Content-Type, Accept
 | GET | `/api/project` | `/project` | 프로젝트, 실험 기능 |
 | GET | `/api/blog` | `/blog` | 기술 기록, 미디어 |
 
+참고: `/api/blog`가 실패하면 프론트엔드는 `/velog/graphql`을 통해 Velog GraphQL API를 호출합니다. 개발 환경에서는 Vite proxy가 `https://v2.velog.io/graphql`로 전달합니다. 자세한 내용은 `docs/velog-api.md`를 참고하세요.
+
 ## Common Types
 
 ```ts

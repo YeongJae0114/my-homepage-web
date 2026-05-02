@@ -12,7 +12,9 @@ import type {
   ProjectPageApiResponse,
   ServicePageApiResponse,
 } from "../types/pages";
+import { blogPageFallback } from "../data/pageFallbacks";
 import { fetchJson } from "./apiClient";
+import { getVelogPosts } from "./velogApi";
 
 export async function getAboutPageContent() {
   return mapAboutApiToViewModel(await fetchJson<AboutPageApiResponse>("/about"));
@@ -31,5 +33,14 @@ export async function getProjectPageContent() {
 }
 
 export async function getBlogPageContent() {
-  return mapBlogApiToViewModel(await fetchJson<BlogPageApiResponse>("/blog"));
+  try {
+    return mapBlogApiToViewModel(await fetchJson<BlogPageApiResponse>("/blog"));
+  } catch {
+    const posts = await getVelogPosts();
+
+    return {
+      posts,
+      mediaItems: blogPageFallback.mediaItems,
+    };
+  }
 }
