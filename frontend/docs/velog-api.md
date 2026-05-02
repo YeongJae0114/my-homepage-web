@@ -33,10 +33,35 @@ Accept: application/json
 
 ```json
 {
-  "query": "query Posts($username: String!, $limit: Int) { posts(username: $username, limit: $limit) { id title short_description url_slug tags released_at } }",
+  "query": "query Posts($username: String!, $limit: Int, $cursor: ID) { posts(username: $username, limit: $limit, cursor: $cursor) { id title short_description url_slug tags released_at } }",
   "variables": {
     "username": "yjl8628",
-    "limit": 10
+    "limit": 10,
+    "cursor": null
+  }
+}
+```
+
+다음 페이지 요청 시 `cursor`에는 이전 응답의 마지막 게시글 `id`를 넣습니다.
+
+```json
+{
+  "query": "query Posts($username: String!, $limit: Int, $cursor: ID) { posts(username: $username, limit: $limit, cursor: $cursor) { id title short_description url_slug tags released_at } }",
+  "variables": {
+    "username": "yjl8628",
+    "limit": 10,
+    "cursor": "9c30dcdc-182c-4da4-afdc-3233221c4e8e"
+  }
+}
+```
+
+## Velog Profile Request
+
+```json
+{
+  "query": "query User($username: String!) { user(username: $username) { id username profile { display_name short_bio thumbnail } velog_config { title logo_image } } }",
+  "variables": {
+    "username": "yjl8628"
   }
 }
 ```
@@ -74,6 +99,8 @@ Velog post는 프론트 내부 `Post` 타입으로 변환됩니다.
   url: `https://velog.io/@${username}/${post.url_slug}`
 }
 ```
+
+`short_description`은 공백을 정리한 뒤 200자를 초과하면 `...`을 붙여 표시합니다.
 
 관련 파일:
 

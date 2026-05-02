@@ -1,13 +1,11 @@
 import {
   aboutPageFallback,
-  blogPageFallback,
   monitoringPageFallback,
   projectPageFallback,
   servicePageFallback,
 } from "../data/pageFallbacks";
 import {
   getAboutPageContent,
-  getBlogPageContent,
   getMonitoringPageContent,
   getProjectPageContent,
   getServicePageContent,
@@ -28,8 +26,4 @@ export function useMonitoringPageData() {
 
 export function useProjectPageData() {
   return useApiFallback(getProjectPageContent, projectPageFallback);
-}
-
-export function useBlogPageData() {
-  return useApiFallback(getBlogPageContent, blogPageFallback);
 }
