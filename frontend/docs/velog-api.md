@@ -3,12 +3,11 @@
 블로그 페이지(`/blog`)는 다음 순서로 데이터를 가져옵니다.
 
 ```text
-1. GET /api/blog
-2. POST https://v2.velog.io/graphql
-3. src/data/pageFallbacks.ts
+1. POST /velog/graphql
+2. src/data/pageFallbacks.ts
 ```
 
-즉 Mock 서버가 아직 없거나 `/api/blog`가 실패하면 Velog GraphQL에서 글 목록을 가져옵니다. Velog 요청도 실패하면 기존 정적 fallback 데이터로 화면이 유지됩니다.
+즉 블로그 글 목록은 Mock API를 거치지 않고 Velog GraphQL에서 직접 가져옵니다. Velog 요청이 실패하면 기존 정적 fallback 데이터로 화면이 유지됩니다.
 
 ## Environment Variables
 
@@ -87,4 +86,4 @@ src/services/pageApi.ts
 
 ## Spring Boot Migration Note
 
-브라우저에서 Velog GraphQL을 직접 호출할 때 CORS 정책에 막힐 수 있습니다. 실제 운영에서는 Spring Boot backend에서 Velog GraphQL을 proxy 또는 scheduled sync 방식으로 가져오고, 프론트에는 기존 `/api/blog` 응답 형식으로 내려주는 구성이 더 안정적입니다.
+브라우저에서 Velog GraphQL을 직접 호출할 때 CORS 정책에 막힐 수 있습니다. 현재 개발 환경은 Vite proxy(`/velog/graphql`)를 사용합니다. 실제 운영에서는 Spring Boot backend에서 Velog GraphQL을 proxy 또는 scheduled sync 방식으로 가져오고, 프론트에는 별도 블로그 endpoint로 내려주는 구성이 더 안정적입니다.

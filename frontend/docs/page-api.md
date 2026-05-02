@@ -117,9 +117,11 @@ type ProjectPageApiResponse = {
 };
 ```
 
-## GET /api/blog
+## Blog Page Data
 
-Used by `/blog`.
+`/blog`는 현재 Mock API를 사용하지 않고 Velog GraphQL을 직접 호출합니다. 자세한 내용은 `docs/velog-api.md`를 참고하세요.
+
+정적 fallback 구조는 아래와 같습니다.
 
 ```ts
 type BlogPageApiResponse = {
@@ -212,7 +214,6 @@ GET /api/about
 GET /api/service
 GET /api/monitoring
 GET /api/project
-GET /api/blog
 ```
 
 Each endpoint can initially aggregate records from DB tables into page-specific DTOs. The frontend adapter layer allows backend DTOs to evolve without forcing UI components to know database-oriented shapes.

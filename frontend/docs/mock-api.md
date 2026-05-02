@@ -26,7 +26,6 @@ GET http://localhost:8080/api/about
 GET http://localhost:8080/api/service
 GET http://localhost:8080/api/monitoring
 GET http://localhost:8080/api/project
-GET http://localhost:8080/api/blog
 ```
 
 ## Required Headers
@@ -60,9 +59,8 @@ Access-Control-Allow-Headers: Content-Type, Accept
 | GET | `/api/service` | `/service` | 서비스 목록, 미디어, 연락처 |
 | GET | `/api/monitoring` | `/monitoring` | 서버/서비스 상태 |
 | GET | `/api/project` | `/project` | 프로젝트, 실험 기능 |
-| GET | `/api/blog` | `/blog` | 기술 기록, 미디어 |
 
-참고: `/api/blog`가 실패하면 프론트엔드는 `/velog/graphql`을 통해 Velog GraphQL API를 호출합니다. 개발 환경에서는 Vite proxy가 `https://v2.velog.io/graphql`로 전달합니다. 자세한 내용은 `docs/velog-api.md`를 참고하세요.
+참고: `/blog` 페이지의 글 목록은 Mock API가 아니라 `/velog/graphql`을 통해 Velog GraphQL API를 호출합니다. 개발 환경에서는 Vite proxy가 `https://v2.velog.io/graphql`로 전달합니다. 자세한 내용은 `docs/velog-api.md`를 참고하세요.
 
 ## Common Types
 
@@ -391,15 +389,6 @@ type ProjectApiResponse = {
 };
 ```
 
-## GET /api/blog
-
-```ts
-type BlogApiResponse = {
-  posts: PostPayload[];
-  mediaItems: ContentItemPayload[];
-};
-```
-
 ## Mock Data Rules
 
 - `id`는 안정적인 문자열이어야 합니다.
@@ -438,5 +427,5 @@ src/adapters/pageAdapters.ts
 1. `GET /api/home` 먼저 구현
 2. `.env.local`에 `VITE_API_BASE_URL` 설정
 3. 프론트 홈 화면에서 mock 데이터가 보이는지 확인
-4. `/api/about`, `/api/service`, `/api/monitoring`, `/api/project`, `/api/blog` 순서로 추가
+4. `/api/about`, `/api/service`, `/api/monitoring`, `/api/project` 순서로 추가
 5. Spring Boot 전환 시 같은 response shape의 DTO를 유지

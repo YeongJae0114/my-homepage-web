@@ -1,13 +1,11 @@
 import {
   mapAboutApiToViewModel,
-  mapBlogApiToViewModel,
   mapMonitoringApiToViewModel,
   mapProjectApiToViewModel,
   mapServiceApiToViewModel,
 } from "../adapters/pageAdapters";
 import type {
   AboutPageApiResponse,
-  BlogPageApiResponse,
   MonitoringPageApiResponse,
   ProjectPageApiResponse,
   ServicePageApiResponse,
@@ -33,14 +31,10 @@ export async function getProjectPageContent() {
 }
 
 export async function getBlogPageContent() {
-  try {
-    return mapBlogApiToViewModel(await fetchJson<BlogPageApiResponse>("/blog"));
-  } catch {
-    const posts = await getVelogPosts();
+  const posts = await getVelogPosts();
 
-    return {
-      posts,
-      mediaItems: blogPageFallback.mediaItems,
-    };
-  }
+  return {
+    posts,
+    mediaItems: blogPageFallback.mediaItems,
+  };
 }
