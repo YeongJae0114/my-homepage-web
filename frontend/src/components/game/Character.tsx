@@ -1,4 +1,4 @@
-import { characterFrames, MAP_COLUMNS, MAP_ROWS, type Direction, type Position } from "./mapData";
+import { CHARACTER_SPRITE, MAP_COLUMNS, MAP_ROWS, type Direction, type Position } from "./mapData";
 
 type CharacterProps = {
   position: Position;
@@ -21,7 +21,10 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
   const height = roundToEven(width * 1.68);
   const x = Math.round((position.x + 0.5) * cellWidth - width / 2);
   const y = Math.round((position.y + 0.5) * cellHeight - height * 0.7);
-  const activeFrameSrc = characterFrames[direction][frame] ?? characterFrames[direction][0];
+  const spriteColumn = Math.min(frame, CHARACTER_SPRITE.columns - 1);
+  const spriteRow = CHARACTER_SPRITE.directionRows[direction];
+  const backgroundX = CHARACTER_SPRITE.columns === 1 ? 0 : (spriteColumn / (CHARACTER_SPRITE.columns - 1)) * 100;
+  const backgroundY = CHARACTER_SPRITE.rows === 1 ? 0 : (spriteRow / (CHARACTER_SPRITE.rows - 1)) * 100;
 
   return (
     <div
@@ -34,14 +37,15 @@ export function Character({ position, direction, frame, sceneSize }: CharacterPr
         transform: `translate3d(${x}px, ${y}px, 0)`,
       }}
     >
-      <img
-        src={activeFrameSrc}
-        alt=""
+      <div
         aria-hidden="true"
-        decoding="async"
-        draggable={false}
-        className="absolute inset-0 h-full w-full object-contain"
-        style={{ imageRendering: "auto" }}
+        className="absolute inset-0 bg-no-repeat"
+        style={{
+          backgroundImage: `image-set(url("${CHARACTER_SPRITE.webp}") type("image/webp"), url("${CHARACTER_SPRITE.png}") type("image/png"))`,
+          backgroundSize: `${CHARACTER_SPRITE.columns * 100}% ${CHARACTER_SPRITE.rows * 100}%`,
+          backgroundPosition: `${backgroundX}% ${backgroundY}%`,
+          imageRendering: "auto",
+        }}
       />
     </div>
   );

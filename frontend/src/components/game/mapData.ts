@@ -84,25 +84,15 @@ export const MAP_DATA: MapDefinition[] = [
   },
 ];
 
-export const characterFrames: Record<Direction, string[]> = {
-  down: [
-    "/images/character/01_front_idle.svg",
-    "/images/character/02_front_walk_a.svg",
-    "/images/character/03_front_walk_b.svg",
-  ],
-  up: [
-    "/images/character/04_back_idle.svg",
-    "/images/character/05_back_walk_a.svg",
-    "/images/character/06_back_walk_b.svg",
-  ],
-  right: [
-    "/images/character/07_side_right_idle.svg",
-    "/images/character/08_side_right_walk_a.svg",
-    "/images/character/09_side_right_walk_b.svg",
-  ],
-  left: [
-    "/images/character/10_side_left_idle.svg",
-    "/images/character/11_side_left_walk_a.svg",
-    "/images/character/12_side_left_walk_b.svg",
-  ],
+export const CHARACTER_SPRITE = {
+  webp: "/images/character-sprite/character-sprite.webp",
+  png: "/images/character-sprite/character-sprite.png",
+  columns: 3,
+  rows: 4,
+  directionRows: {
+    down: 0,
+    up: 1,
+    right: 2,
+    left: 3,
+  } satisfies Record<Direction, number>,
 };

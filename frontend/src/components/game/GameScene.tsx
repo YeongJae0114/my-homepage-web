@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Character } from "./Character";
 import { MapSelector } from "./MapSelector";
 import { MobileJoypad } from "./MobileJoypad";
-import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, characterFrames, type Direction, type MapDefinition, type Position } from "./mapData";
+import { CHARACTER_SPRITE, MAP_COLUMNS, MAP_DATA, MAP_ROWS, type Direction, type MapDefinition, type Position } from "./mapData";
 
 const MOVE_STEP = 0.25;
 const VERTICAL_MOVE_STEP = MOVE_STEP * (MAP_ROWS / MAP_COLUMNS);
@@ -49,17 +49,11 @@ function getStartPosition(map: MapDefinition): Position {
 }
 
 function getGameAssetSources() {
-  return [...MAP_DATA.map((map) => map.image), ...Object.values(characterFrames).flat()];
+  return [...MAP_DATA.map((map) => map.image), CHARACTER_SPRITE.webp, CHARACTER_SPRITE.png];
 }
 
 function getInitialGameAssetSources(map: MapDefinition) {
-  return [
-    map.image,
-    characterFrames.down[0],
-    characterFrames.up[0],
-    characterFrames.left[0],
-    characterFrames.right[0],
-  ];
+  return [map.image, CHARACTER_SPRITE.webp, CHARACTER_SPRITE.png];
 }
 
 function getRemainingGameAssetSources(initialSources: string[]) {
