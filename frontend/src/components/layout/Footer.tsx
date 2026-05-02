@@ -14,12 +14,12 @@ export function Footer() {
             <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{siteConfig.description}</p>
           </div>
 
-          <div className="flex flex-wrap gap-2 md:justify-end">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 md:justify-end">
             {siteConfig.contactLinks.map((link) => (
               <AppLink
                 key={link.href}
                 href={link.href}
-                className="rounded-md border border-white/10 px-3 py-2 text-sm text-zinc-300 transition hover:border-emerald-300/35 hover:bg-white/[0.06] hover:text-zinc-50"
+                className="text-sm text-zinc-400 underline-offset-4 transition hover:text-emerald-100 hover:underline"
                 target={link.external ? "_blank" : undefined}
                 rel={link.external ? "noreferrer" : undefined}
               >

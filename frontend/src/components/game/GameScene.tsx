@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { useNavigate } from "react-router-dom";
 import { Character } from "./Character";
 import { MapSelector } from "./MapSelector";
-import { MenuModal } from "./MenuModal";
 import { MobileJoypad } from "./MobileJoypad";
 import { MAP_COLUMNS, MAP_DATA, MAP_ROWS, characterFrames, type Direction, type MapDefinition, type Position } from "./mapData";
 
@@ -76,7 +75,6 @@ export function GameScene() {
   const [direction, setDirection] = useState<Direction>("down");
   const [isMoving, setIsMoving] = useState(false);
   const [frame, setFrame] = useState(IDLE_FRAME);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameReady, setIsGameReady] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [sceneSize, setSceneSize] = useState(DEFAULT_SCENE_SIZE);
@@ -350,20 +348,7 @@ export function GameScene() {
       </div>
 
       {isGameReady && <MapSelector maps={MAP_DATA} selectedMapId={selectedMap.id} onSelect={handleMapSelect} />}
-      <button
-        type="button"
-        className="absolute right-4 top-4 z-30 rounded-lg border border-white/10 bg-surface-950/75 px-4 py-2 text-sm font-semibold text-zinc-100 shadow-glow backdrop-blur transition hover:bg-white/[0.08]"
-        onClick={() => setIsMenuOpen(true)}
-      >
-        일반 메뉴로 보기
-      </button>
-      {isGameReady && (
-        <div className="absolute bottom-4 left-4 z-30 hidden rounded-lg border border-white/10 bg-surface-950/65 px-3 py-2 font-mono text-xs text-zinc-400 backdrop-blur md:block">
-          Click game, then Arrow / WASD
-        </div>
-      )}
       {isGameReady && <MobileJoypad onStart={startMoving} onStop={stopMoving} />}
-      <MenuModal isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </section>
   );
 }
