@@ -1,5 +1,4 @@
 import { BlogPreview } from "../components/sections/BlogPreview";
-import { MediaPreview } from "../components/sections/MediaPreview";
 import { useVelogBlogData } from "../hooks/useVelogBlogData";
 
 export function BlogPage() {
@@ -15,7 +14,6 @@ export function BlogPage() {
         hasMore={hasMore}
         onLoadMore={loadMore}
       />
-      <MediaPreview items={data.mediaItems} />
     </>
   );
 }
