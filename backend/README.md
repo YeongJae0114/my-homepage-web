@@ -15,6 +15,25 @@ Swagger UI: http://localhost:8080/swagger-ui.html
 OpenAPI JSON: http://localhost:8080/api-docs
 ```
 
+Local monitoring tools are also started by Docker Compose:
+
+```text
+Prometheus: http://localhost:9090
+Grafana: http://localhost:3001
+Grafana login: admin / admin
+Spring metrics: http://localhost:8080/actuator/prometheus
+```
+
+Prometheus scrapes the local Spring application through `host.docker.internal:8080`, and Grafana is preconfigured with Prometheus as its default datasource.
+
+To add real servers to the same Prometheus setup, copy the example target file and replace hosts:
+
+```bash
+cp monitoring/prometheus/real-servers.example monitoring/prometheus/targets/real-servers.yml
+```
+
+Each real server should expose a metrics endpoint such as `node_exporter` on port `9100`. Keep Prometheus and Grafana private; expose only the Spring API and frontend publicly.
+
 Default local database values:
 
 ```text
