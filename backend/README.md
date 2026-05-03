@@ -8,6 +8,13 @@ Run `BackendApplication` from IntelliJ with the `local` profile. If no profile i
 
 Spring Boot reads `docker-compose.yaml` and starts the PostgreSQL container automatically when the application starts.
 
+API documentation is available while the application is running:
+
+```text
+Swagger UI: http://localhost:8080/swagger-ui.html
+OpenAPI JSON: http://localhost:8080/api-docs
+```
+
 Default local database values:
 
 ```text
@@ -29,8 +36,32 @@ SPRING_PROFILES_ACTIVE=local
 DB_URL=jdbc:postgresql://localhost:5432/my_homepage
 DB_USERNAME=my_homepage
 DB_PASSWORD=my_homepage
-JPA_DDL_AUTO=update
+JPA_DDL_AUTO=validate
 JPA_SHOW_SQL=true
+```
+
+## Database Migration
+
+This project uses Flyway instead of Hibernate DDL generation.
+
+Migration files live in:
+
+```text
+src/main/resources/db/migration
+```
+
+Rules:
+
+```text
+V*_create_* files create tables and constraints.
+V*_seed_* files insert initial read-only content.
+spring.jpa.hibernate.ddl-auto stays validate.
+```
+
+When the local Docker database already has tables created by an older `ddl-auto` run, reset the local volume before first Flyway use:
+
+```bash
+docker compose down -v
 ```
 
 ## Dev Deployment
