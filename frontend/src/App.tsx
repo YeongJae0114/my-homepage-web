@@ -4,6 +4,7 @@ import { Header } from "./components/layout/Header";
 import { AboutPage } from "./pages/AboutPage";
 import { BlogPage } from "./pages/BlogPage";
 import { HomePage } from "./pages/HomePage";
+import { LocalLLMChatPage } from "./pages/LocalLLMChatPage";
 import { MonitoringPage } from "./pages/MonitoringPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ServicePage } from "./pages/ServicePage";
@@ -17,6 +18,7 @@ function AppShell() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/service" element={<ServicePage />} />
+          <Route path="/llm" element={<LocalLLMChatPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/infra" element={<Navigate to="/monitoring" replace />} />
           <Route path="/status" element={<Navigate to="/monitoring" replace />} />

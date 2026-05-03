@@ -1,7 +1,36 @@
-import type { LlmMessage, LlmModelStatus, RetrievalSource } from "../types/llm";
+import { fetchJson } from "./apiClient";
+import type {
+  LlmChatRequest,
+  LlmChatResponse,
+  LlmMessage,
+  LlmModelStatus,
+  LlmServerStatus,
+  LlmStatusResponse,
+  LlmWakeResponse,
+  RetrievalSource,
+} from "../types/llm";
+
+const jsonHeaders = {
+  "Content-Type": "application/json",
+};
 
 export async function getModelStatus(): Promise<LlmModelStatus> {
   return "offline";
+}
+
+export async function getLlmServerStatus(): Promise<LlmServerStatus> {
+  const response = await fetchJson<LlmStatusResponse>("/llm/status");
+
+  return response.status;
+}
+
+export async function wakeLocalGpuServer(): Promise<LlmServerStatus> {
+  const response = await fetchJson<LlmWakeResponse>("/llm/wake", {
+    method: "POST",
+    headers: jsonHeaders,
+  });
+
+  return response.status;
 }
 
 export async function searchLocalKnowledge(_query: string): Promise<RetrievalSource[]> {
@@ -9,12 +38,12 @@ export async function searchLocalKnowledge(_query: string): Promise<RetrievalSou
   return [];
 }
 
-export async function sendPrompt(_messages: LlmMessage[]): Promise<LlmMessage> {
-  void _messages;
-  return {
-    id: "placeholder-response",
-    role: "assistant",
-    content: "Local LLM integration is not connected yet.",
-    createdAt: new Date().toISOString(),
-  };
+export async function sendPrompt(messages: LlmMessage[]): Promise<LlmMessage> {
+  const response = await fetchJson<LlmChatResponse>("/llm/chat", {
+    method: "POST",
+    headers: jsonHeaders,
+    body: JSON.stringify({ messages } satisfies LlmChatRequest),
+  });
+
+  return response.message;
 }

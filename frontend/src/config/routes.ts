@@ -11,5 +11,5 @@ export const routeConfig: RouteConfig[] = [
   { path: "/infra", label: "Infra Redirect", enabled: true, showInNavigation: false, description: "Legacy infra route" },
   { path: "/status", label: "Status Redirect", enabled: true, showInNavigation: false, description: "Legacy status route" },
   { path: "/lab", label: "Lab", enabled: false, showInNavigation: false, description: "Experimental features" },
-  { path: "/llm", label: "LLM", enabled: false, showInNavigation: false, description: "Local LLM workspace" },
+  { path: "/llm", label: "LLM", enabled: true, showInNavigation: false, description: "Local LLM workspace" },
 ];
