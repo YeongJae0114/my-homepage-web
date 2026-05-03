@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "../components/common/Badge";
 import { Card } from "../components/common/Card";
 import { Container } from "../components/common/Container";
@@ -52,6 +53,7 @@ function formatTime(value: string) {
 }
 
 export function LocalLLMChatPage() {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
@@ -122,6 +124,10 @@ export function LocalLLMChatPage() {
     setAuthError(null);
     setPassword("");
     setIsAuthenticated(true);
+  };
+
+  const handleCloseAuth = () => {
+    navigate("/service", { replace: true });
   };
 
   const handleWake = async () => {
@@ -268,7 +274,17 @@ export function LocalLLMChatPage() {
       {!isAuthenticated ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-surface-950/70 px-4 backdrop-blur-md">
           <Card className="w-full max-w-md p-5">
-            <Badge tone="cyan">Auth Lock</Badge>
+            <div className="flex items-start justify-between gap-4">
+              <Badge tone="cyan">Auth Lock</Badge>
+              <button
+                type="button"
+                className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-cyan-200/30 hover:bg-cyan-200/10 hover:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-cyan-200/40"
+                onClick={handleCloseAuth}
+                aria-label="LLM 소개 페이지로 돌아가기"
+              >
+                닫기
+              </button>
+            </div>
             <h2 className="mt-4 text-2xl font-semibold text-zinc-50">Local LLM 접근 인증</h2>
             <p className="mt-3 text-sm leading-6 text-zinc-400">
               이 페이지는 실제 로컬 GPU 서버와 연결되는 작업 공간입니다. 권한이 있는 사용자만 접근할 수 있습니다.
