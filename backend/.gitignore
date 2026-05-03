@@ -29,7 +29,6 @@ out/
 ### Environment ###
 .env
 .env.*
-!.env.example
 
 ### NetBeans ###
 /nbproject/private/

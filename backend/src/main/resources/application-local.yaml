@@ -2,6 +2,11 @@ spring:
   config:
     activate:
       on-profile: local
+  docker:
+    compose:
+      enabled: ${SPRING_DOCKER_COMPOSE_ENABLED:true}
+      file: ${SPRING_DOCKER_COMPOSE_FILE:./docker-compose.yaml}
+      lifecycle-management: start-and-stop
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/my_homepage}
     username: ${DB_USERNAME:my_homepage}
