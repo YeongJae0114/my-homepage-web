@@ -46,7 +46,7 @@ export const MAP_DATA: MapDefinition[] = [
     grid: baseGrid,
     zones: [
       { id: "about", label: "About", path: "/about", x: 9.3, y: 1.5 },
-      { id: "service", label: "Service", path: "/service", x: 12, y: 6 },
+      { id: "service", label: "LLM", path: "/service", x: 12, y: 6 },
       { id: "blog", label: "Blog", path: "/blog", x: 4, y: 1.5 },
       { id: "project", label: "Project", path: "/project", x: 3, y: 3.5 },
       { id: "monitoring", label: "Monitoring", path: "/monitoring", x: 12, y: 3.5},
@@ -61,7 +61,7 @@ export const MAP_DATA: MapDefinition[] = [
     grid: baseGrid,
     zones: [
       { id: "about", label: "About", path: "/about", x: 7.5, y: 2.1 },
-      { id: "service", label: "Service", path: "/service", x: 4, y: 6.7 },
+      { id: "service", label: "LLM", path: "/service", x: 4, y: 6.7 },
       { id: "blog", label: "Blog", path: "/blog", x: 3, y: 3.5 },
       { id: "project", label: "Project", path: "/project", x: 10.5, y: 3.3 },
       { id: "monitoring", label: "Monitoring", path: "/monitoring", x: 10.5, y: 6.5 },
@@ -76,7 +76,7 @@ export const MAP_DATA: MapDefinition[] = [
     grid: baseGrid,
     zones: [
       { id: "about", label: "About", path: "/about", x: 1.9, y: 1.6 },
-      { id: "service", label: "Service", path: "/service", x: 2.2, y: 4.6 },
+      { id: "service", label: "LLM", path: "/service", x: 2.2, y: 4.6 },
       { id: "blog", label: "Blog", path: "/blog", x: 12.5, y: 4.4 },
       { id: "project", label: "Project", path: "/project", x: 7.6, y: 6.5 },
       { id: "monitoring", label: "Monitoring", path: "/monitoring", x: 7.6, y: 2 },

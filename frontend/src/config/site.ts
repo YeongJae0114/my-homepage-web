@@ -15,7 +15,7 @@ export const siteConfig: SiteConfig = {
     { label: "GitHub", href: "https://github.com/YeongJae0114", variant: "primary", external: true },
     { label: "Blog", href: "https://velog.io/@yjl8628/posts", variant: "primary", external: true },
     { label: "Monitoring", href: "/monitoring", variant: "primary" },
-    { label: "Service", href: "/service", variant: "primary" },
+    { label: "LLM Service", href: "/service", variant: "primary" },
   ],
   contactLinks: [
     {

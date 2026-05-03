@@ -3,7 +3,7 @@ import type { RouteConfig } from "../types/site";
 export const routeConfig: RouteConfig[] = [
   { path: "/", label: "Home", enabled: true, showInNavigation: true, description: "Landing and platform overview" },
   { path: "/about", label: "About", enabled: true, showInNavigation: true, description: "Detailed profile and skills" },
-  { path: "/service", label: "Service", enabled: true, showInNavigation: true, description: "Available services and integration points" },
+  { path: "/service", label: "LLM Service", enabled: true, showInNavigation: true, description: "Local GPU LLM system overview" },
   { path: "/monitoring", label: "Monitoring", enabled: true, showInNavigation: true, description: "Infrastructure and service status" },
   { path: "/project", label: "Project", enabled: true, showInNavigation: true, description: "Project archive" },
   { path: "/blog", label: "Blog", enabled: true, showInNavigation: true, description: "Markdown or API powered posts" },

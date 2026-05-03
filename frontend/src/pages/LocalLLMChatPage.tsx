@@ -33,6 +33,8 @@ const initialMessages: LlmMessage[] = [
   },
 ];
 
+const testAccessKey = "local-llm-test";
+
 function createMessage(role: LlmMessage["role"], content: string): LlmMessage {
   return {
     id: globalThis.crypto?.randomUUID?.() ?? `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -60,7 +62,8 @@ export function LocalLLMChatPage() {
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<LlmMessage[]>(initialMessages);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
-  const accessKey = import.meta.env.VITE_LOCAL_LLM_ACCESS_KEY;
+  const accessKey = import.meta.env.VITE_LOCAL_LLM_ACCESS_KEY ?? testAccessKey;
+  const isUsingTestAccessKey = !import.meta.env.VITE_LOCAL_LLM_ACCESS_KEY;
   const activeStatus = statusMeta[serverStatus];
   const canSend = isAuthenticated && serverStatus === "online" && prompt.trim().length > 0 && !isSending;
 
@@ -110,11 +113,6 @@ export function LocalLLMChatPage() {
 
   const handleAuthSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!accessKey) {
-      setAuthError("VITE_LOCAL_LLM_ACCESS_KEY 환경변수가 설정되어 있지 않습니다.");
-      return;
-    }
 
     if (password !== accessKey) {
       setAuthError("패스워드가 올바르지 않습니다.");
@@ -275,6 +273,11 @@ export function LocalLLMChatPage() {
             <p className="mt-3 text-sm leading-6 text-zinc-400">
               이 페이지는 실제 로컬 GPU 서버와 연결되는 작업 공간입니다. 권한이 있는 사용자만 접근할 수 있습니다.
             </p>
+            {isUsingTestAccessKey ? (
+              <p className="mt-3 rounded-md border border-amber-300/20 bg-amber-300/[0.08] px-3 py-2 font-mono text-xs text-amber-100">
+                Test key: {testAccessKey}
+              </p>
+            ) : null}
             <form className="mt-5 grid gap-3" onSubmit={handleAuthSubmit}>
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-zinc-300">Access password</span>
