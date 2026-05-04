@@ -153,6 +153,9 @@ public class MonitoringQueryServiceImpl implements MonitoringQueryService {
 	}
 
 	private String toSummaryMessage(String status, long onlineCount, long degradedCount, long offlineCount, long standbyCount) {
+		if (standbyCount > 0 && degradedCount == 0 && offlineCount == 0) {
+			return "Monitoring collection has not completed yet";
+		}
 		return switch (status) {
 			case "incident" -> "Some monitored systems are offline";
 			case "degraded" -> "Some monitored systems need attention";
