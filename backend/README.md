@@ -146,9 +146,6 @@ from GitHub Actions secrets:
 DB_URL=jdbc:postgresql://postgres:5432/my_homepage
 DB_USERNAME=secret-value
 DB_PASSWORD=secret-value
-APP_CORS_ALLOWED_ORIGINS=https://your-domain.example
-APP_FRONTEND_BASE_URL=https://your-domain.example
-MONITORING_COLLECTION_ENABLED=false
 ```
 
 Use the PostgreSQL container name in `DB_URL`. For example, if your DB
@@ -173,23 +170,20 @@ location /api/ {
 GitHub repository secrets required for automatic deployment:
 
 ```text
-BACKEND_HOST
-BACKEND_USER
-BACKEND_SSH_KEY
-BACKEND_PORT
-BACKEND_DEPLOY_PATH
-GHCR_USERNAME
-GHCR_TOKEN
+DOCKERHUB_USERNAME
+DOCKERHUB_TOKEN
+TS_OAUTH_CLIENT_ID
+TS_OAUTH_SECRET
+DEPLOY_HOST
+DEPLOY_USER
+DEPLOY_SSH_PRIVATE_KEY
+DEPLOY_PATH
 DB_URL
 DB_USERNAME
 DB_PASSWORD
-APP_CORS_ALLOWED_ORIGINS
-APP_FRONTEND_BASE_URL
-MONITORING_COLLECTION_ENABLED
 ```
 
-`BACKEND_PORT` is optional when SSH uses port `22`.
-`GHCR_TOKEN` should be a GitHub token that can read packages from GitHub
-Container Registry. The deploy workflow copies `compose.prod.yml` to
-`BACKEND_DEPLOY_PATH`, writes `.env.production` from GitHub Actions secrets,
-pulls the new backend image, and restarts only the Spring backend container.
+Monitoring collection defaults to `false` in `compose.prod.yml`. The deploy
+workflow connects through Tailscale, copies `compose.prod.yml` to `DEPLOY_PATH`,
+writes `.env.production` from GitHub Actions secrets, pulls the new Docker Hub
+image, and restarts only the Spring backend container.
