@@ -1,0 +1,21 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}
+    container_name: my-homepage-backend
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      JPA_SHOW_SQL: ${JPA_SHOW_SQL:-false}
+    expose:
+      - "8080"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: ${APP_NETWORK:-my-homepage-net}
