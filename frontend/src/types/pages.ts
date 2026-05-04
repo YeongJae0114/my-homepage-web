@@ -37,6 +37,14 @@ export type MonitoringPageViewModel = {
   services: Service[];
 };
 
+export type MonitoringServersViewModel = {
+  servers: Server[];
+};
+
+export type MonitoringServicesViewModel = {
+  services: Service[];
+};
+
 export type ProjectPageViewModel = {
   projects: Project[];
   labFeatures: LabFeature[];
@@ -49,7 +57,8 @@ export type BlogPageViewModel = {
 
 export type AboutPageApiResponse = AboutPageViewModel;
 export type ServicePageApiResponse = ServicePageViewModel;
-export type MonitoringPageApiResponse = MonitoringPageViewModel;
+export type MonitoringServersApiResponse = MonitoringServersViewModel;
+export type MonitoringServicesApiResponse = MonitoringServicesViewModel;
 export type ProjectPageApiResponse = ProjectPageViewModel;
 export type BlogPageApiResponse = BlogPageViewModel;
 

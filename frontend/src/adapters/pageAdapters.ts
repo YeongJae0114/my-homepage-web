@@ -3,8 +3,10 @@ import type {
   AboutPageViewModel,
   BlogPageApiResponse,
   BlogPageViewModel,
-  MonitoringPageApiResponse,
-  MonitoringPageViewModel,
+  MonitoringServersApiResponse,
+  MonitoringServersViewModel,
+  MonitoringServicesApiResponse,
+  MonitoringServicesViewModel,
   ProjectPageApiResponse,
   ProjectPageViewModel,
   ServicePageApiResponse,
@@ -28,9 +30,14 @@ export function mapServiceApiToViewModel(response: ServicePageApiResponse): Serv
   };
 }
 
-export function mapMonitoringApiToViewModel(response: MonitoringPageApiResponse): MonitoringPageViewModel {
+export function mapMonitoringServersApiToViewModel(response: MonitoringServersApiResponse): MonitoringServersViewModel {
   return {
     servers: response.servers,
+  };
+}
+
+export function mapMonitoringServicesApiToViewModel(response: MonitoringServicesApiResponse): MonitoringServicesViewModel {
+  return {
     services: response.services,
   };
 }

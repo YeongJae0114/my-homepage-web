@@ -79,11 +79,20 @@ type ServicePageApiResponse = {
 
 ## GET /api/monitoring
 
-Used by `/monitoring`.
+Used by `/monitoring` server status cards and summary.
 
 ```ts
-type MonitoringPageApiResponse = {
+type MonitoringServersApiResponse = {
   servers: ServerPayload[];
+};
+```
+
+## GET /api/monitoring/services
+
+Used by `/monitoring` service status cards.
+
+```ts
+type MonitoringServicesApiResponse = {
   services: ServicePayload[];
 };
 ```
@@ -213,6 +222,7 @@ GET /api/home
 GET /api/about
 GET /api/service
 GET /api/monitoring
+GET /api/monitoring/services
 GET /api/project
 ```
 

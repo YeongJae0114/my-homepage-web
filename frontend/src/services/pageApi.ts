@@ -1,12 +1,14 @@
 import {
   mapAboutApiToViewModel,
-  mapMonitoringApiToViewModel,
+  mapMonitoringServersApiToViewModel,
+  mapMonitoringServicesApiToViewModel,
   mapProjectApiToViewModel,
   mapServiceApiToViewModel,
 } from "../adapters/pageAdapters";
 import type {
   AboutPageApiResponse,
-  MonitoringPageApiResponse,
+  MonitoringServersApiResponse,
+  MonitoringServicesApiResponse,
   ProjectPageApiResponse,
   ServicePageApiResponse,
 } from "../types/pages";
@@ -20,8 +22,12 @@ export async function getServicePageContent() {
   return mapServiceApiToViewModel(await fetchJson<ServicePageApiResponse>("/service"));
 }
 
-export async function getMonitoringPageContent() {
-  return mapMonitoringApiToViewModel(await fetchJson<MonitoringPageApiResponse>("/monitoring"));
+export async function getMonitoringServersContent() {
+  return mapMonitoringServersApiToViewModel(await fetchJson<MonitoringServersApiResponse>("/monitoring"));
+}
+
+export async function getMonitoringServicesContent() {
+  return mapMonitoringServicesApiToViewModel(await fetchJson<MonitoringServicesApiResponse>("/monitoring/services"));
 }
 
 export async function getProjectPageContent() {
