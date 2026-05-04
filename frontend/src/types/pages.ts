@@ -32,12 +32,20 @@ export type ServicePageViewModel = {
   contact: ContactViewModel;
 };
 
+export type MonitoringSummaryViewModel = {
+  status: string;
+  message: string;
+  lastUpdatedAt: string;
+};
+
 export type MonitoringPageViewModel = {
+  summary?: MonitoringSummaryViewModel;
   servers: Server[];
   services: Service[];
 };
 
 export type MonitoringServersViewModel = {
+  summary?: MonitoringSummaryViewModel;
   servers: Server[];
 };
 

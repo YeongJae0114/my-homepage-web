@@ -32,6 +32,7 @@ export function mapServiceApiToViewModel(response: ServicePageApiResponse): Serv
 
 export function mapMonitoringServersApiToViewModel(response: MonitoringServersApiResponse): MonitoringServersViewModel {
   return {
+    summary: response.summary,
     servers: response.servers,
   };
 }

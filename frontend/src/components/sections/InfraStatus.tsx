@@ -1,4 +1,5 @@
 import type { Server, Service } from "../../types/infra";
+import type { MonitoringSummaryViewModel } from "../../types/pages";
 import { Container } from "../common/Container";
 import { SectionTitle } from "../common/SectionTitle";
 import { ServerStatusCard } from "../infra/ServerStatusCard";
@@ -6,16 +7,17 @@ import { ServiceStatusCard } from "../infra/ServiceStatusCard";
 import { StatusSummary } from "../infra/StatusSummary";
 
 type InfraStatusProps = {
+  summary?: MonitoringSummaryViewModel;
   servers: Server[];
   services: Service[];
 };
 
-export function InfraStatus({ servers, services }: InfraStatusProps) {
+export function InfraStatus({ summary, servers, services }: InfraStatusProps) {
   return (
     <section id="infra" className="section-shell">
       <Container>
-        <SectionTitle eyebrow="Infra" title="개인 서버와 서비스 상태" description="현재는 더미 데이터지만, statusApi를 실제 모니터링 API로 교체하면 같은 UI가 실시간 상태 보드로 확장됩니다." />
-        <StatusSummary servers={servers} services={services} />
+        <SectionTitle eyebrow="Infra" title="개인 서버와 서비스 상태" description="홈랩 서버와 운영 서비스의 현재 상태, 리소스 사용률, 마지막 수집 시각을 한 화면에서 확인합니다." />
+        <StatusSummary summary={summary} servers={servers} services={services} />
         <div className="mt-8 grid gap-5 lg:grid-cols-2">
           {servers.map((server) => (
             <ServerStatusCard key={server.id} server={server} />

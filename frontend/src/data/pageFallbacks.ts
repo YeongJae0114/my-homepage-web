@@ -44,6 +44,11 @@ export const servicePageFallback: ServicePageViewModel = {
 };
 
 export const monitoringPageFallback: MonitoringPageViewModel = {
+  summary: {
+    status: "operational",
+    message: "Fallback monitoring snapshot is ready",
+    lastUpdatedAt: "2026-05-01T22:42:00+09:00",
+  },
   servers,
   services,
 };

@@ -4,5 +4,5 @@ import { useMonitoringPageData } from "../hooks/usePageData";
 export function InfraPage() {
   const { data } = useMonitoringPageData();
 
-  return <InfraStatus servers={data.servers} services={data.services} />;
+  return <InfraStatus summary={data.summary} servers={data.servers} services={data.services} />;
 }

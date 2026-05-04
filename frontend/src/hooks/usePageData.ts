@@ -13,7 +13,10 @@ import {
 } from "../services/pageApi";
 import { useApiFallback } from "./useApiFallback";
 
-const monitoringServersFallback = { servers: monitoringPageFallback.servers };
+const monitoringServersFallback = {
+  summary: monitoringPageFallback.summary,
+  servers: monitoringPageFallback.servers,
+};
 const monitoringServicesFallback = { services: monitoringPageFallback.services };
 
 export function useAboutPageData() {
@@ -31,6 +34,7 @@ export function useMonitoringPageData() {
 
   return {
     data: {
+      summary: serversState.data.summary,
       servers: serversState.data.servers,
       services: servicesState.data.services,
     },

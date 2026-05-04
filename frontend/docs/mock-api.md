@@ -394,6 +394,11 @@ type ServiceApiResponse = {
 
 ```ts
 type MonitoringApiResponse = {
+  summary?: {
+    status: string;
+    message: string;
+    lastUpdatedAt: string;
+  };
   servers: ServerPayload[];
 };
 ```

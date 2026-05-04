@@ -84,6 +84,11 @@ Used by `/monitoring` server status cards and summary.
 
 ```ts
 type MonitoringServersApiResponse = {
+  summary?: {
+    status: string;
+    message: string;
+    lastUpdatedAt: string;
+  };
   servers: ServerPayload[];
 };
 ```
