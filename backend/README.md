@@ -34,6 +34,27 @@ cp monitoring/prometheus/real-servers.example monitoring/prometheus/targets/real
 
 Each real server should expose a metrics endpoint such as `node_exporter` on port `9100`. Keep Prometheus and Grafana private; expose only the Spring API and frontend publicly.
 
+The Spring backend also stores public monitoring snapshots for the homepage. It collects enabled LAN servers every 10 minutes and keeps only the latest 30 days of snapshots.
+
+```text
+Configured LAN targets:
+raspi-observe  192.168.1.104:9100
+raspi-redis    192.168.1.103:9100
+lab-mini       192.168.1.102:9100
+lab-main       192.168.1.105:9100
+raspi-db       192.168.1.106:9100
+```
+
+Collection settings:
+
+```text
+MONITORING_COLLECTION_ENABLED=true
+MONITORING_COLLECTION_FIXED_DELAY=10m
+MONITORING_COLLECTION_INITIAL_DELAY=30s
+MONITORING_COLLECTION_REQUEST_TIMEOUT=3s
+MONITORING_RETENTION_PERIOD=30d
+```
+
 Default local database values:
 
 ```text

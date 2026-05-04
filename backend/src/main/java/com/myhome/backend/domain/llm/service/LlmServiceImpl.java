@@ -2,6 +2,7 @@ package com.myhome.backend.domain.llm.service;
 
 import com.myhome.backend.domain.llm.dto.LlmChatRequest;
 import com.myhome.backend.domain.llm.dto.LlmChatResponse;
+import com.myhome.backend.domain.llm.dto.LlmMessageResponse;
 import com.myhome.backend.domain.llm.dto.LlmStatusResponse;
 import com.myhome.backend.domain.llm.dto.LlmWakeResponse;
 import com.myhome.backend.domain.llm.entity.LlmServer;
@@ -47,10 +48,12 @@ public class LlmServiceImpl implements LlmService {
 	public LlmChatResponse chat(LlmChatRequest request) {
 		// TODO: DB 연동 및 비즈니스 로직 구현 - 외부 로컬 LLM 서버 HTTP/gRPC 통신 로직 구현
 		return new LlmChatResponse(
-				null,
-				null,
-				LlmServerStatus.OFFLINE.name().toLowerCase(),
-				LocalDateTime.now()
+				new LlmMessageResponse(
+						"assistant-" + System.currentTimeMillis(),
+						"assistant",
+						"로컬 LLM 서버 연동은 아직 준비 중입니다.",
+						LocalDateTime.now().toString()
+				)
 		);
 	}
 

@@ -1,12 +1,17 @@
 package com.myhome.backend.domain.page.service;
 
-import com.myhome.backend.domain.page.dto.PageResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.AboutResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.HomeResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.ProjectPageResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.ServicePageResponse;
 
 public interface PageQueryService {
 
-	PageResponse getHome();
+	HomeResponse getHome();
 
-	PageResponse getAbout();
+	AboutResponse getAbout();
 
-	PageResponse getProject();
+	ProjectPageResponse getProject();
+
+	ServicePageResponse getService();
 }

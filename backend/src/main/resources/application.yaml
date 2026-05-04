@@ -41,3 +41,12 @@ app:
   external:
     velog-graphql-url: ${APP_EXTERNAL_VELOG_GRAPHQL_URL:https://v2.velog.io/graphql}
     github-api-url: ${APP_EXTERNAL_GITHUB_API_URL:https://api.github.com}
+
+monitoring:
+  collection:
+    enabled: ${MONITORING_COLLECTION_ENABLED:true}
+    fixed-delay: ${MONITORING_COLLECTION_FIXED_DELAY:10m}
+    initial-delay: ${MONITORING_COLLECTION_INITIAL_DELAY:1s}
+    request-timeout: ${MONITORING_COLLECTION_REQUEST_TIMEOUT:3s}
+  retention:
+    period: ${MONITORING_RETENTION_PERIOD:30d}

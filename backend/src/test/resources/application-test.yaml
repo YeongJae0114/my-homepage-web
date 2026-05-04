@@ -11,3 +11,7 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+monitoring:
+  collection:
+    enabled: false

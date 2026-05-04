@@ -1,6 +1,9 @@
 package com.myhome.backend.domain.page.controller;
 
-import com.myhome.backend.domain.page.dto.PageResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.AboutResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.HomeResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.ProjectPageResponse;
+import com.myhome.backend.domain.page.dto.FrontendPageResponses.ServicePageResponse;
 import com.myhome.backend.domain.page.service.PageQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,17 +18,22 @@ public class PageController {
 	private final PageQueryService pageQueryService;
 
 	@GetMapping("/home")
-	public PageResponse getHome() {
+	public HomeResponse getHome() {
 		return pageQueryService.getHome();
 	}
 
 	@GetMapping("/about")
-	public PageResponse getAbout() {
+	public AboutResponse getAbout() {
 		return pageQueryService.getAbout();
 	}
 
+	@GetMapping("/service")
+	public ServicePageResponse getService() {
+		return pageQueryService.getService();
+	}
+
 	@GetMapping("/project")
-	public PageResponse getProject() {
+	public ProjectPageResponse getProject() {
 		return pageQueryService.getProject();
 	}
 }

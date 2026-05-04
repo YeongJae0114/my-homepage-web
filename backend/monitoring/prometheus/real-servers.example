@@ -1,41 +1,34 @@
 - targets:
-    - spring-server-2.example.local:9100
+    - 192.168.1.104:9100
   labels:
-    service: spring-server-2
-    role: backend-postgres
-    environment: dev
-
-- targets:
-    - spring-server-1.example.local:9100
-  labels:
-    service: spring-server-1
-    role: toy-projects
-    environment: dev
-
-- targets:
-    - redis-pi.example.local:9100
-  labels:
-    service: redis-server
-    role: redis
-    environment: dev
-
-- targets:
-    - db-pi.example.local:9100
-  labels:
-    service: db-server
-    role: database
-    environment: dev
-
-- targets:
-    - monitoring-pi.example.local:9100
-  labels:
-    service: monitoring-server
+    service: raspi-observe
     role: monitoring
-    environment: dev
+    environment: lan
 
 - targets:
-    - llm-desktop.example.local:9100
+    - 192.168.1.103:9100
   labels:
-    service: llm-server
+    service: raspi-redis
+    role: redis
+    environment: lan
+
+- targets:
+    - 192.168.1.102:9100
+  labels:
+    service: lab-mini
+    role: toy-projects
+    environment: lan
+
+- targets:
+    - 192.168.1.105:9100
+  labels:
+    service: lab-main
     role: llm
-    environment: dev
+    environment: lan
+
+- targets:
+    - 192.168.1.106:9100
+  labels:
+    service: raspi-db
+    role: database
+    environment: lan

@@ -1,18 +1,20 @@
 package com.myhome.backend.domain.monitoring.dto;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.myhome.backend.domain.monitoring.dto.MetricResponses.ServerMetricsResponse;
+import java.time.OffsetDateTime;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ServerResponse(
-		Long id,
+		String id,
 		String name,
-		String host,
-		String location,
+		String description,
+		String role,
 		String status,
-		Double cpuUsagePercent,
-		Double memoryUsagePercent,
-		Double diskUsagePercent,
-		LocalDateTime lastCheckedAt,
-		List<ServiceResponse> services
+		Long latencyMs,
+		OffsetDateTime lastCheckedAt,
+		List<String> tags,
+		ServerMetricsResponse metrics
 ) {
 }
