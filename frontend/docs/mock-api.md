@@ -9,9 +9,10 @@
 프론트엔드 기본값:
 
 ```text
-development: /api
-production: https://api.zerojae175-dev.shop/api
+/api
 ```
+
+Production deploys keep `/api` as a same-origin path and Vercel rewrites it to `https://api.zerojae175-dev.shop/api`.
 
 외부 Mock 서버 사용 시 `frontend/.env.local`:
 
