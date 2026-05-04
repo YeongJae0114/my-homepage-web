@@ -12,6 +12,7 @@ If an API request fails, the page renders fallback data from `src/data/pageFallb
 
 - Default: `/api`
 - Override: `VITE_API_BASE_URL`
+- Production default: `https://api.zerojae175-dev.shop/api`
 
 Example:
 

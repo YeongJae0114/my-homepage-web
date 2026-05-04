@@ -9,7 +9,8 @@
 프론트엔드 기본값:
 
 ```text
-/api
+development: /api
+production: https://api.zerojae175-dev.shop/api
 ```
 
 외부 Mock 서버 사용 시 `frontend/.env.local`:

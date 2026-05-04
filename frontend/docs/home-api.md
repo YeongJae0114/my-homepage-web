@@ -6,7 +6,8 @@ The frontend keeps static `data/config` files as fallback data. When a mock or r
 
 ## Frontend Integration
 
-- Default base URL: `/api`
+- Development default base URL: `/api`
+- Production default base URL: `https://api.zerojae175-dev.shop/api`
 - Override base URL: `VITE_API_BASE_URL`
 - Endpoint used by frontend: `GET /home`
 - Full URL examples:
