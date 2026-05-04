@@ -9,12 +9,14 @@ type StatusSummaryProps = {
 export function StatusSummary({ servers, services }: StatusSummaryProps) {
   const onlineServers = servers.filter((server) => server.status === "online").length;
   const incidentCount = [...servers, ...services].filter((item) => item.status === "offline" || item.status === "degraded").length;
+  const latencyServers = servers.filter((server) => typeof server.latencyMs === "number" && server.latencyMs > 0);
+  const uptimeServers = servers.filter((server) => typeof server.uptime === "number");
   const averageLatency = Math.round(
-    servers.filter((server) => server.latencyMs > 0).reduce((sum, server) => sum + server.latencyMs, 0) /
-      Math.max(1, servers.filter((server) => server.latencyMs > 0).length),
+    latencyServers.reduce((sum, server) => sum + (server.latencyMs ?? 0), 0) /
+      Math.max(1, latencyServers.length),
   );
   const availability =
-    servers.reduce((sum, server) => sum + server.uptime, 0) / Math.max(1, servers.length);
+    uptimeServers.reduce((sum, server) => sum + (server.uptime ?? 0), 0) / Math.max(1, uptimeServers.length);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

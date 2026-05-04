@@ -15,6 +15,11 @@ export const servers: Server[] = [
     lastCheckedAt: "2026-05-01T22:40:00+09:00",
     services: ["Nginx Proxy", "TLS Renewal"],
     tags: ["public", "https", "edge"],
+    metrics: {
+      cpu: { usedPercent: 18.4 },
+      memory: { usedPercent: 46.8, availableGb: 2.13, totalGb: 4 },
+      disk: { usedPercent: 41.2, availableGb: 58.8, totalGb: 100 },
+    },
   },
   {
     id: "api-01",
@@ -30,6 +35,11 @@ export const servers: Server[] = [
     lastCheckedAt: "2026-05-01T22:39:00+09:00",
     services: ["Portfolio API", "Batch Worker"],
     tags: ["spring", "docker", "internal"],
+    metrics: {
+      cpu: { usedPercent: 78.6 },
+      memory: { usedPercent: 72.3, availableGb: 4.43, totalGb: 16 },
+      disk: { usedPercent: 64.9, availableGb: 175.5, totalGb: 500 },
+    },
   },
   {
     id: "db-01",
@@ -45,6 +55,11 @@ export const servers: Server[] = [
     lastCheckedAt: "2026-05-01T22:41:00+09:00",
     services: ["PostgreSQL", "MariaDB"],
     tags: ["database", "backup", "private"],
+    metrics: {
+      cpu: { usedPercent: 12.7 },
+      memory: { usedPercent: 58.1, availableGb: 6.7, totalGb: 16 },
+      disk: { usedPercent: 82.4, availableGb: 176, totalGb: 1000 },
+    },
   },
   {
     id: "lab-llm",
@@ -60,5 +75,10 @@ export const servers: Server[] = [
     lastCheckedAt: "2026-05-01T20:10:00+09:00",
     services: ["Model Runtime", "Vector Store"],
     tags: ["llm", "rag", "private"],
+    metrics: {
+      cpu: { usedPercent: 6.2 },
+      memory: { usedPercent: 28.4, availableGb: 22.91, totalGb: 32 },
+      disk: { usedPercent: 37.6, availableGb: 624, totalGb: 1000 },
+    },
   },
 ];

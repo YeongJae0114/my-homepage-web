@@ -16,7 +16,7 @@ export function InfraStatus({ servers, services }: InfraStatusProps) {
       <Container>
         <SectionTitle eyebrow="Infra" title="개인 서버와 서비스 상태" description="현재는 더미 데이터지만, statusApi를 실제 모니터링 API로 교체하면 같은 UI가 실시간 상태 보드로 확장됩니다." />
         <StatusSummary servers={servers} services={services} />
-        <div className="mt-8 grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid gap-5 lg:grid-cols-2">
           {servers.map((server) => (
             <ServerStatusCard key={server.id} server={server} />
           ))}

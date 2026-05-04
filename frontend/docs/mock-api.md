@@ -109,15 +109,30 @@ type ServerPayload = {
   name: string;
   description: string;
   role: "web" | "api" | "db" | "redis" | "monitoring" | "reverse-proxy" | "lab";
-  environment: "home-lab" | "cloud" | "raspberry-pi" | "proxmox" | "docker";
-  provider: string;
-  location: string;
+  environment?: "home-lab" | "cloud" | "raspberry-pi" | "proxmox" | "docker";
+  provider?: string;
+  location?: string;
   status: ServiceStatus;
-  uptime: number;
-  latencyMs: number;
+  uptime?: number;
+  latencyMs?: number;
   lastCheckedAt: string;
-  services: string[];
+  services?: string[];
   tags: string[];
+  metrics?: {
+    cpu: {
+      usedPercent: number;
+    };
+    memory: {
+      usedPercent: number;
+      availableGb: number;
+      totalGb: number;
+    };
+    disk: {
+      usedPercent: number;
+      availableGb: number;
+      totalGb: number;
+    };
+  };
 };
 
 type ProjectPayload = {

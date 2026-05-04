@@ -4,20 +4,37 @@ export type ServerRole = "web" | "api" | "db" | "redis" | "monitoring" | "revers
 
 export type ServerEnvironment = "home-lab" | "cloud" | "raspberry-pi" | "proxmox" | "docker";
 
+export type ServerHardwareMetrics = {
+  cpu: {
+    usedPercent: number;
+  };
+  memory: {
+    usedPercent: number;
+    availableGb: number;
+    totalGb: number;
+  };
+  disk: {
+    usedPercent: number;
+    availableGb: number;
+    totalGb: number;
+  };
+};
+
 export type Server = {
   id: string;
   name: string;
   description: string;
   role: ServerRole;
-  environment: ServerEnvironment;
-  provider: string;
-  location: string;
+  environment?: ServerEnvironment;
+  provider?: string;
+  location?: string;
   status: ServiceStatus;
-  uptime: number;
-  latencyMs: number;
+  uptime?: number;
+  latencyMs?: number;
   lastCheckedAt: string;
-  services: string[];
+  services?: string[];
   tags: string[];
+  metrics?: ServerHardwareMetrics;
 };
 
 export type Service = {

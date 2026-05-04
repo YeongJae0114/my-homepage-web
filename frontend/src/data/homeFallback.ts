@@ -43,9 +43,9 @@ export const homeFallback: HomeViewModel = (() => {
         servers: servers.slice(0, 3).map((server) => ({
           id: server.id,
           name: server.name,
-          provider: server.provider,
+          provider: server.provider ?? "Unknown",
           role: server.role,
-          latencyMs: server.latencyMs,
+          latencyMs: server.latencyMs ?? 0,
         })),
         extensionEyebrow: "next extension point",
         extensionDescription:
