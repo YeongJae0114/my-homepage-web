@@ -181,9 +181,9 @@ DEPLOY_PATH
 DB_URL
 DB_USERNAME
 DB_PASSWORD
+MONITORING_COLLECTION_ENABLED
 ```
 
-Monitoring collection defaults to `false` in `compose.prod.yml`. The deploy
-workflow connects through Tailscale, copies `compose.prod.yml` to `DEPLOY_PATH`,
-writes `.env.production` from GitHub Actions secrets, pulls the new Docker Hub
-image, and restarts only the Spring backend container.
+The deploy workflow connects through Tailscale, copies `compose.prod.yml` to
+`DEPLOY_PATH`, writes `.env.production` from GitHub Actions secrets, pulls the
+new Docker Hub image, and restarts only the Spring backend container.

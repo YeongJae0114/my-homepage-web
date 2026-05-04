@@ -92,6 +92,7 @@ jobs:
           DB_URL=${{ secrets.DB_URL }}
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          MONITORING_COLLECTION_ENABLED=${{ secrets.MONITORING_COLLECTION_ENABLED }}
           EOF
 
       - name: Sync compose and env to server
