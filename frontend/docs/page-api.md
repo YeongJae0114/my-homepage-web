@@ -12,7 +12,7 @@ If an API request fails, the page renders fallback data from `src/data/pageFallb
 
 - Default: `/api`
 - Override: `VITE_API_BASE_URL`
-- Production uses the same-origin `/api` path, which Vercel rewrites to `https://api.zerojae175-dev.shop/api`.
+- Production uses the same-origin `/api` path, which Vercel rewrites to `https://api.zerojae.cloud/api`.
 
 Example:
 

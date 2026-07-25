@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://api.zerojae175-dev.shop/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://api.zerojae.cloud/api/:path*" },
     { "source": "/velog/graphql", "destination": "https://v2.velog.io/graphql" },
     { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ]

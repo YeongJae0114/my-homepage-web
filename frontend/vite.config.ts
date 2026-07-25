@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://api.zerojae175-dev.shop",
+        target: "https://api.zerojae.cloud",
         changeOrigin: true,
         secure: true,
       },
