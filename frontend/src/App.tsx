@@ -4,6 +4,7 @@ import { OwnerProvider } from "./components/auth/OwnerProvider";
 import { RequireOwner } from "./components/auth/RequireOwner";
 import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
+import { useOwnerShortcut } from "./hooks/useOwnerShortcut";
 import { AboutPage } from "./pages/AboutPage";
 import { BlogPage } from "./pages/BlogPage";
 import { HomePage } from "./pages/HomePage";
@@ -17,6 +18,8 @@ import { ServicePage } from "./pages/ServicePage";
 const PortfolioPage = lazy(() => import("./pages/PortfolioPage").then((module) => ({ default: module.PortfolioPage })));
 
 function AppShell() {
+  useOwnerShortcut();
+
   return (
     <div className="min-h-screen bg-surface-950 text-zinc-50">
       <Header />
