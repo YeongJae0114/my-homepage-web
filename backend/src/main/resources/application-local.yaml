@@ -20,6 +20,11 @@ spring:
         format_sql: true
     show-sql: ${JPA_SHOW_SQL:true}
 
+# Local-only default login: owner / local-owner-password ({noop} is rejected outside local/test).
+owner:
+  username: ${OWNER_USERNAME:owner}
+  password-hash: "${OWNER_PASSWORD_HASH:{noop}local-owner-password}"
+
 management:
   endpoint:
     health:

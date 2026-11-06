@@ -15,3 +15,7 @@ spring:
 monitoring:
   collection:
     enabled: false
+
+owner:
+  username: owner
+  password-hash: "{noop}test-password"

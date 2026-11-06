@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { navigationItems } from "../../config/navigation";
 import { siteConfig } from "../../config/site";
+import { useOwner } from "../../hooks/useOwner";
 import { AppLink } from "../common/AppLink";
 import { Container } from "../common/Container";
 import { cn } from "../../utils/cn";
@@ -9,9 +10,13 @@ import { cn } from "../../utils/cn";
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
+  const { owner } = useOwner();
   const items = useMemo(
-    () => navigationItems.filter((item) => item.enabled).sort((a, b) => a.order - b.order),
-    [],
+    () =>
+      navigationItems
+        .filter((item) => item.enabled && (!item.ownerOnly || owner))
+        .sort((a, b) => a.order - b.order),
+    [owner],
   );
 
   return (
