@@ -15,6 +15,20 @@ Swagger UI: http://localhost:8080/swagger-ui.html
 OpenAPI JSON: http://localhost:8080/api-docs
 ```
 
+## Owner Login
+
+Owner-only APIs live under `/api/portfolio/**` and require the single owner's session (401 otherwise). Everything else stays public.
+
+The frontend login page is the unlinked route `/owner`. The local profile logs in with `owner` / `local-owner-password`.
+
+Production reads two environment variables, set as GitHub Secrets (`OWNER_USERNAME`, `OWNER_PASSWORD_HASH`). Store only a bcrypt hash, never the password:
+
+```bash
+docker run --rm httpd:2.4-alpine htpasswd -bnBC 12 "" 'your-long-random-password' | tr -d ':\n'
+```
+
+Paste the printed `$2y$12$...` value as `OWNER_PASSWORD_HASH`; a `{bcrypt}` prefix is optional. If either secret is missing, owner login is disabled and the public site keeps running. Five failed logins lock login for 15 minutes.
+
 Local monitoring tools are also started by Docker Compose:
 
 ```text

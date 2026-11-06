@@ -9,6 +9,18 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: ${SESSION_TIMEOUT:2h}
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:true}
+        same-site: strict
+
+# Single site owner. Empty values disable owner login (the public site keeps working).
+owner:
+  username: ${OWNER_USERNAME:}
+  password-hash: ${OWNER_PASSWORD_HASH:}
 
 management:
   endpoints:
@@ -32,6 +44,7 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
     tags-sorter: alpha
+  paths-to-exclude: /api/auth/**,/api/portfolio/**
 
 app:
   cors:
@@ -50,3 +63,15 @@ monitoring:
     request-timeout: ${MONITORING_COLLECTION_REQUEST_TIMEOUT:3s}
   retention:
     period: ${MONITORING_RETENTION_PERIOD:30d}
+
+# Owner portfolio market data. Empty keys = not connected yet: collectors skip, manual input works.
+# Schedules (KST) can be overridden with portfolio.schedule.{kr-prices,us-prices,fx,snapshot}.
+portfolio:
+  request-timeout: ${PORTFOLIO_REQUEST_TIMEOUT:5s}
+  kis:
+    base-url: ${KIS_BASE_URL:https://openapi.koreainvestment.com:9443}
+    app-key: ${KIS_APP_KEY:}
+    app-secret: ${KIS_APP_SECRET:}
+  kexim:
+    base-url: ${KEXIM_BASE_URL:https://oapi.koreaexim.go.kr}
+    api-key: ${KEXIM_API_KEY:}

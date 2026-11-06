@@ -86,6 +86,13 @@ jobs:
           ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Create deployment env file
+        env:
+          OWNER_USERNAME: ${{ secrets.OWNER_USERNAME }}
+          OWNER_PASSWORD_HASH: ${{ secrets.OWNER_PASSWORD_HASH }}
+          # Optional until issued: empty values keep market-data collection off (manual input still works).
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KEXIM_API_KEY: ${{ secrets.KEXIM_API_KEY }}
         run: |
           cat > deploy.env <<EOF
           BACKEND_IMAGE=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
@@ -94,6 +101,11 @@ jobs:
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           MONITORING_COLLECTION_ENABLED=${{ secrets.MONITORING_COLLECTION_ENABLED }}
           EOF
+          # bcrypt hashes contain '$': keep them out of the heredoc (shell expansion) and
+          # single-quote them so docker compose does not interpolate them either.
+          printf "OWNER_USERNAME='%s'\nOWNER_PASSWORD_HASH='%s'\n" "$OWNER_USERNAME" "$OWNER_PASSWORD_HASH" >> deploy.env
+          printf "KIS_APP_KEY='%s'\nKIS_APP_SECRET='%s'\nKEXIM_API_KEY='%s'\n" \
+            "$KIS_APP_KEY" "$KIS_APP_SECRET" "$KEXIM_API_KEY" >> deploy.env
 
       - name: Sync compose and env to server
         run: |
