@@ -7,4 +7,5 @@ export const navigationItems: NavigationItem[] = [
   { label: "Monitoring", href: "/monitoring", enabled: true, order: 40 },
   { label: "Project", href: "/project", enabled: true, order: 50 },
   { label: "Blog", href: "/blog", enabled: true, order: 60 },
+  { label: "Portfolio", href: "/portfolio", enabled: true, order: 70, ownerOnly: true },
 ];

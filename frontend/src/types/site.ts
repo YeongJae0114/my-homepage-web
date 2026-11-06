@@ -33,6 +33,8 @@ export type NavigationItem = {
   href: string;
   enabled: boolean;
   order: number;
+  /** Shown only to the logged-in site owner. */
+  ownerOnly?: boolean;
 };
 
 export type SectionConfig = {
