@@ -1,6 +1,7 @@
 package com.myhome.backend.domain.portfolio.service;
 
 import com.myhome.backend.domain.portfolio.entity.PortfolioSnapshot;
+import com.myhome.backend.domain.portfolio.repository.AccountRepository;
 import com.myhome.backend.domain.portfolio.repository.FxRateRepository;
 import com.myhome.backend.domain.portfolio.repository.LedgerTransactionRepository;
 import com.myhome.backend.domain.portfolio.repository.ManualValuationRepository;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SnapshotService {
 
 	private final PortfolioDataLoader dataLoader;
+	private final AccountRepository accountRepository;
 	private final PortfolioSnapshotRepository snapshotRepository;
 	private final PriceRepository priceRepository;
 	private final FxRateRepository fxRateRepository;
@@ -37,6 +39,11 @@ public class SnapshotService {
 	/** Creates (or recaptures) the snapshot for the date. Only called with today's date. */
 	@Transactional
 	public PortfolioSnapshot capture(LocalDate date) {
+		accountRepository.lockAllForLedgerWrite();
+		return captureCurrent(date);
+	}
+
+	private PortfolioSnapshot captureCurrent(LocalDate date) {
 		Inputs inputs = dataLoader.load();
 		Result result = PortfolioValuator.valueAt(inputs, date);
 		BigDecimal cumulativeFlow = PortfolioValuator.scopeFlows(inputs, null, date).stream()
@@ -65,6 +72,7 @@ public class SnapshotService {
 	/** Scheduled capture: skipped when nothing changed since the last snapshot (holidays need no calendar). */
 	@Transactional
 	public boolean captureIfChanged(LocalDate date) {
+		accountRepository.lockAllForLedgerWrite();
 		Optional<LocalDateTime> since = lockedThrough();
 		if (since.isPresent()) {
 			boolean changed = priceRepository.existsByCapturedAtAfter(since.get())
@@ -75,7 +83,7 @@ public class SnapshotService {
 				return false;
 			}
 		}
-		capture(date);
+		captureCurrent(date);
 		return true;
 	}
 

@@ -1,5 +1,8 @@
 package com.myhome.backend.domain.portfolio.controller;
 
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.CsvFile;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.CsvRequest;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.ImportResult;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.HoldingsResponse;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.TransactionPage;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.TransactionRequest;
@@ -41,6 +44,26 @@ public class TransactionController {
 			@RequestParam(defaultValue = "50") int size
 	) {
 		return ledgerService.getTransactions(accountId, type, from, to, page, size);
+	}
+
+	@GetMapping("/transactions/csv/template")
+	public CsvFile getTransactionCsvTemplate() {
+		return ledgerService.getTransactionCsvTemplate();
+	}
+
+	@GetMapping("/transactions/csv/export")
+	public CsvFile exportTransactionsCsv() {
+		return ledgerService.exportTransactionsCsv();
+	}
+
+	@PostMapping("/transactions/csv/preview")
+	public ImportResult previewTransactionsCsv(@Valid @RequestBody CsvRequest request) {
+		return ledgerService.previewTransactionsCsv(request);
+	}
+
+	@PostMapping("/transactions/csv/import")
+	public ImportResult importTransactionsCsv(@Valid @RequestBody CsvRequest request) {
+		return ledgerService.importTransactionsCsv(request);
 	}
 
 	@PostMapping("/transactions")

@@ -38,7 +38,7 @@ export function PortfolioPage() {
     }
   }
 
-  function openTransactions(accountId: number) {
+  function openTransactions(accountId: number | null) {
     setTransactionAccountId(accountId);
     setTab("transactions");
   }
@@ -78,7 +78,7 @@ export function PortfolioPage() {
         ))}
       </nav>
 
-      {tab === "summary" ? <SummaryPanel onStart={() => setTab("accounts")} /> : null}
+      {tab === "summary" ? <SummaryPanel onStart={() => setTab("accounts")} onRecord={() => openTransactions(null)} /> : null}
       {tab === "transactions" ? <TransactionsPanel initialAccountId={transactionAccountId} /> : null}
       {tab === "accounts" ? <AccountsPanel onAddTransaction={openTransactions} /> : null}
       {tab === "instruments" ? <InstrumentsPanel /> : null}

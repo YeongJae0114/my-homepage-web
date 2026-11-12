@@ -16,11 +16,14 @@ import com.myhome.backend.domain.portfolio.dto.DashboardDtos.HistoryPoint;
 import com.myhome.backend.domain.portfolio.dto.DashboardDtos.Holding;
 import com.myhome.backend.domain.portfolio.dto.DashboardDtos.Maturity;
 import com.myhome.backend.domain.portfolio.dto.DashboardDtos.Performance;
+import com.myhome.backend.domain.portfolio.dto.DashboardDtos.PeriodChange;
 import com.myhome.backend.domain.portfolio.dto.DashboardDtos.Summary;
 import com.myhome.backend.domain.portfolio.entity.Account;
 import com.myhome.backend.domain.portfolio.entity.Account.AccountType;
 import com.myhome.backend.domain.portfolio.entity.Instrument;
 import com.myhome.backend.domain.portfolio.entity.PortfolioSnapshot;
+import com.myhome.backend.domain.portfolio.entity.Price;
+import com.myhome.backend.domain.portfolio.entity.MarketDataSource;
 import com.myhome.backend.domain.portfolio.repository.PortfolioSnapshotRepository;
 import com.myhome.backend.domain.portfolio.service.PortfolioValuator.AssetGroup;
 import com.myhome.backend.domain.portfolio.service.PortfolioValuator.HoldingValue;
@@ -34,13 +37,13 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -63,44 +66,63 @@ public class DashboardServiceImpl implements DashboardService {
 
 	@Override
 	public DashboardResponse getDashboard(String range) {
-		LocalDate today = LocalDate.now(ZONE);
+		ZonedDateTime calculatedAt = ZonedDateTime.now(ZONE);
+		LocalDate today = calculatedAt.toLocalDate();
 		LocalDate historyStart = historyStart(range, today);
 		Inputs inputs = dataLoader.load();
 		Result now = PortfolioValuator.valueAt(inputs, today);
 		List<PortfolioSnapshot> snapshots = snapshotRepository.findAllByOrderBySnapshotDateAsc();
+		List<CashFlow> flows = PortfolioValuator.scopeFlows(inputs, null, today);
+		BigDecimal netContribution = flows.stream().map(CashFlow::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
+		List<Holding> holdings = holdings(inputs, now.holdings(), calculatedAt);
 
 		return new DashboardResponse(
-				summary(now, today),
-				performance(inputs, now, snapshots, today),
+				summary(now, snapshots, today, netContribution),
+				performance(now, snapshots, today, flows, netContribution),
 				allocation(now),
 				exposure(now.holdings()),
 				history(snapshots, now, historyStart, today),
-				holdings(now.holdings(), today),
+				holdings,
 				accounts(inputs, now),
 				maturities(inputs, now, today),
-				freshness(inputs, now, today),
-				OffsetDateTime.now(ZONE));
+				freshness(inputs, holdings, today),
+				calculatedAt.toOffsetDateTime());
 	}
 
-	private Summary summary(Result now, LocalDate today) {
+	private static Summary summary(Result now, List<PortfolioSnapshot> snapshots, LocalDate today, BigDecimal netContribution) {
 		LocalDate previousMonthEnd = today.withDayOfMonth(1).minusDays(1);
-		BigDecimal base = snapshotRepository.findTopBySnapshotDateLessThanEqualOrderBySnapshotDateDesc(previousMonthEnd)
-				.map(PortfolioSnapshot::getNetWorth)
-				.orElse(null);
+		PortfolioSnapshot monthBase = baseline(snapshots, previousMonthEnd);
+		BigDecimal base = monthBase == null ? null : monthBase.getNetWorth();
 		BigDecimal change = base == null ? null : now.netWorth().subtract(base);
 		BigDecimal rate = base == null || base.signum() == 0
 				? null
 				: change.multiply(HUNDRED).divide(base.abs(), 8, RoundingMode.HALF_UP);
-		return new Summary(krw(now.totalAssets()), krw(now.totalLiabilities()), krw(now.netWorth()), krw(change), percent(rate));
+		return new Summary(krw(now.totalAssets()), krw(now.totalLiabilities()), krw(now.netWorth()), krw(change), percent(rate),
+				periodChange(now, baseline(snapshots, today.minusDays(1)), netContribution),
+				periodChange(now, monthBase, netContribution));
 	}
 
-	private Performance performance(Inputs inputs, Result now, List<PortfolioSnapshot> snapshots, LocalDate today) {
-		List<CashFlow> flows = PortfolioValuator.scopeFlows(inputs, null, today);
+	private static PortfolioSnapshot baseline(List<PortfolioSnapshot> snapshots, LocalDate through) {
+		return snapshots.stream().filter(snapshot -> !snapshot.getSnapshotDate().isAfter(through))
+				.max(Comparator.comparing(PortfolioSnapshot::getSnapshotDate)).orElse(null);
+	}
+
+	private static PeriodChange periodChange(Result now, PortfolioSnapshot base, BigDecimal cumulative) {
+		if (base == null) {
+			return null;
+		}
+		BigDecimal contributed = cumulative.subtract(base.getScopeCumulativeFlow());
+		BigDecimal investmentChange = now.scopeValue().subtract(base.getScopeValue());
+		return new PeriodChange(base.getSnapshotDate(), krw(now.netWorth().subtract(base.getNetWorth())),
+				krw(investmentChange), krw(contributed), krw(investmentChange.subtract(contributed)));
+	}
+
+	private static Performance performance(Result now, List<PortfolioSnapshot> snapshots, LocalDate today,
+			List<CashFlow> flows, BigDecimal netContribution) {
 		Xirr xirr = ReturnCalculator.xirr(flows, now.scopeValue(), today);
 		LocalDate since = flows.stream().map(CashFlow::date).min(Comparator.naturalOrder()).orElse(null);
 
 		// TWR points: every snapshot, then today's live value (replacing a snapshot taken earlier today).
-		BigDecimal netContribution = flows.stream().map(CashFlow::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
 		List<Point> points = new ArrayList<>();
 		BigDecimal lastCumulative = BigDecimal.ZERO;
 		for (PortfolioSnapshot snapshot : snapshots) {
@@ -187,7 +209,7 @@ public class DashboardServiceImpl implements DashboardService {
 		return points;
 	}
 
-	private static List<Holding> holdings(List<HoldingValue> holdings, LocalDate today) {
+	private static List<Holding> holdings(Inputs inputs, List<HoldingValue> holdings, ZonedDateTime now) {
 		BigDecimal total = holdings.stream()
 				.map(holding -> holding.valuation().marketValueKrw())
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -207,7 +229,9 @@ public class DashboardServiceImpl implements DashboardService {
 						price(holding.position().avgPriceLocal()),
 						price(holding.closePrice()),
 						holding.priceDate(),
-						holding.priceDate() == null || holding.priceDate().isBefore(today.minusDays(STALE_PRICE_DAYS)),
+						priceStale(inputs, holding, now),
+						quote(inputs, holding) == null ? null : quote(inputs, holding).getSource(),
+						collectedAt(inputs, holding),
 						krw(holding.valuation().marketValueKrw()),
 						krw(holding.position().costKrw()),
 						krw(holding.valuation().unrealizedKrw()),
@@ -216,6 +240,28 @@ public class DashboardServiceImpl implements DashboardService {
 						krw(holding.valuation().fxEffectKrw()),
 						weight(holding.valuation().marketValueKrw(), total)))
 				.toList();
+	}
+
+	private static Price quote(Inputs inputs, HoldingValue holding) {
+		return holding.priceDate() == null ? null
+				: inputs.pricesByInstrument().get(holding.instrument().getId()).get(holding.priceDate());
+	}
+
+	private static OffsetDateTime collectedAt(Inputs inputs, HoldingValue holding) {
+		Price price = quote(inputs, holding);
+		// Stored wall times share the existing JVM clock convention with snapshot and ledger timestamps.
+		return price == null || price.getCapturedAt() == null ? null
+				: price.getCapturedAt().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZONE).toOffsetDateTime();
+	}
+
+	private static boolean priceStale(Inputs inputs, HoldingValue holding, ZonedDateTime now) {
+		if (holding.priceDate() == null || holding.priceDate().isBefore(now.toLocalDate().minusDays(STALE_PRICE_DAYS))) {
+			return true;
+		}
+		Price price = quote(inputs, holding);
+		OffsetDateTime captured = collectedAt(inputs, holding);
+		return price.getSource() == MarketDataSource.KIS && PortfolioMarketHours.collectionDelayed(
+				holding.instrument().getMarket(), captured == null ? null : captured.toZonedDateTime(), now);
 	}
 
 	private static List<AccountSummary> accounts(Inputs inputs, Result now) {
@@ -269,16 +315,13 @@ public class DashboardServiceImpl implements DashboardService {
 		return null;
 	}
 
-	private static Freshness freshness(Inputs inputs, Result now, LocalDate today) {
-		List<LocalDate> priceDates = now.holdings().stream().map(HoldingValue::priceDate).filter(Objects::nonNull).toList();
-		int stale = (int) now.holdings().stream()
-				.filter(holding -> holding.priceDate() == null
-						|| holding.priceDate().isBefore(today.minusDays(STALE_PRICE_DAYS)))
-				.count();
+	private static Freshness freshness(Inputs inputs, List<Holding> holdings, LocalDate today) {
+		List<LocalDate> priceDates = holdings.stream().map(Holding::priceDate).filter(Objects::nonNull).toList();
+		int stale = (int) holdings.stream().filter(Holding::priceStale).count();
 		List<FxQuote> fxRates = inputs.fxByCurrency().entrySet().stream()
 				.sorted(Map.Entry.comparingByKey())
 				.map(entry -> {
-					Map.Entry<LocalDate, BigDecimal> latest = ((NavigableMap<LocalDate, BigDecimal>) entry.getValue()).floorEntry(today);
+					Map.Entry<LocalDate, BigDecimal> latest = entry.getValue().floorEntry(today);
 					return latest == null ? null : new FxQuote(entry.getKey(), plain(latest.getValue()), latest.getKey());
 				})
 				.filter(Objects::nonNull)
@@ -287,6 +330,7 @@ public class DashboardServiceImpl implements DashboardService {
 				priceDates.stream().min(Comparator.naturalOrder()).orElse(null),
 				priceDates.stream().max(Comparator.naturalOrder()).orElse(null),
 				stale,
+				holdings.stream().map(Holding::priceCollectedAt).filter(Objects::nonNull).max(Comparator.naturalOrder()).orElse(null),
 				fxRates);
 	}
 

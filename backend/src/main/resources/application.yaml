@@ -65,7 +65,7 @@ monitoring:
     period: ${MONITORING_RETENTION_PERIOD:30d}
 
 # Owner portfolio market data. Empty keys = not connected yet: collectors skip, manual input works.
-# Schedules (KST) can be overridden with portfolio.schedule.{kr-prices,us-prices,fx,snapshot}.
+# portfolio.schedule.us-intraday uses New York time; kr-prices, us-prices, fx and snapshot use KST.
 portfolio:
   request-timeout: ${PORTFOLIO_REQUEST_TIMEOUT:5s}
   kis:

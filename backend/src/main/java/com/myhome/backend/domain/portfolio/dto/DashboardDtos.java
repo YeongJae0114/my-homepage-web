@@ -3,6 +3,7 @@ package com.myhome.backend.domain.portfolio.dto;
 import com.myhome.backend.domain.portfolio.entity.Account.AccountType;
 import com.myhome.backend.domain.portfolio.entity.Instrument.Market;
 import com.myhome.backend.domain.portfolio.entity.Instrument.Region;
+import com.myhome.backend.domain.portfolio.entity.MarketDataSource;
 import com.myhome.backend.domain.portfolio.service.PortfolioValuator.AssetGroup;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,8 +36,15 @@ public final class DashboardDtos {
 			BigDecimal totalLiabilities,
 			BigDecimal netWorth,
 			BigDecimal monthOverMonthChange,
-			BigDecimal monthOverMonthRate
+			BigDecimal monthOverMonthRate,
+			PeriodChange dayChange,
+			PeriodChange monthChange
 	) {
+	}
+
+	/** Investment changes exclude contributions using frozen scope_cumulative_flow, including late entries. */
+	public record PeriodChange(LocalDate baseDate, BigDecimal netWorthChange,
+			BigDecimal investmentChange, BigDecimal netContribution, BigDecimal investmentGain) {
 	}
 
 	/** XIRR since the first contribution (not annualized under a year); TWR since the first snapshot. */
@@ -81,6 +89,8 @@ public final class DashboardDtos {
 			BigDecimal closePrice,
 			LocalDate priceDate,
 			boolean priceStale,
+			MarketDataSource priceSource,
+			OffsetDateTime priceCollectedAt,
 			BigDecimal marketValueKrw,
 			BigDecimal costKrw,
 			BigDecimal unrealizedProfit,
@@ -117,6 +127,7 @@ public final class DashboardDtos {
 			LocalDate oldestPriceDate,
 			LocalDate latestPriceDate,
 			int staleHoldings,
+			OffsetDateTime latestCollectedAt,
 			List<FxQuote> fxRates
 	) {
 	}

@@ -11,7 +11,6 @@ import com.myhome.backend.domain.portfolio.repository.LedgerTransactionRepositor
 import com.myhome.backend.domain.portfolio.repository.ManualValuationRepository;
 import com.myhome.backend.domain.portfolio.repository.PriceRepository;
 import com.myhome.backend.domain.portfolio.service.PortfolioValuator.Inputs;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +40,14 @@ public class PortfolioDataLoader {
 				accountRepository.findAllByOrderByDisplayOrderAscIdAsc(),
 				instrumentRepository.findAll().stream().collect(Collectors.toMap(Instrument::getId, Function.identity())),
 				transactionRepository.findAllByOrderByTradeDateAscIdAsc(),
-				series(priceRepository.findAll(), Price::getInstrumentId, Price::getPriceDate, Price::getClosePrice),
+				series(priceRepository.findAll(), Price::getInstrumentId, Price::getPriceDate, Function.identity()),
 				series(fxRateRepository.findAll(), FxRate::getCurrency, FxRate::getRateDate, FxRate::getRateToKrw),
 				series(valuationRepository.findAll(), ManualValuation::getAccountId,
 						ManualValuation::getValuationDate, ManualValuation::getAmount));
 	}
 
-	private static <T, K> Map<K, NavigableMap<LocalDate, BigDecimal>> series(
-			List<T> rows, Function<T, K> key, Function<T, LocalDate> date, Function<T, BigDecimal> value) {
+	private static <T, K, V> Map<K, NavigableMap<LocalDate, V>> series(
+			List<T> rows, Function<T, K> key, Function<T, LocalDate> date, Function<T, V> value) {
 		return rows.stream().collect(Collectors.groupingBy(key,
 				Collectors.toMap(date, value, (first, second) -> second, TreeMap::new)));
 	}

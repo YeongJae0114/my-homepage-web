@@ -4,6 +4,7 @@ import com.myhome.backend.domain.portfolio.entity.Account;
 import com.myhome.backend.domain.portfolio.entity.Account.AccountType;
 import com.myhome.backend.domain.portfolio.entity.Instrument;
 import com.myhome.backend.domain.portfolio.entity.LedgerTransaction;
+import com.myhome.backend.domain.portfolio.entity.Price;
 import com.myhome.backend.domain.portfolio.service.HoldingsCalculator.LedgerState;
 import com.myhome.backend.domain.portfolio.service.HoldingsCalculator.Position;
 import com.myhome.backend.domain.portfolio.service.HoldingsCalculator.Valuation;
@@ -41,7 +42,7 @@ public final class PortfolioValuator {
 			List<Account> accounts,
 			Map<Long, Instrument> instruments,
 			List<LedgerTransaction> transactions,
-			Map<Long, NavigableMap<LocalDate, BigDecimal>> pricesByInstrument,
+			Map<Long, NavigableMap<LocalDate, Price>> pricesByInstrument,
 			Map<String, NavigableMap<LocalDate, BigDecimal>> fxByCurrency,
 			Map<Long, NavigableMap<LocalDate, BigDecimal>> valuationsByAccount
 	) {
@@ -114,8 +115,8 @@ public final class PortfolioValuator {
 			Account account = accounts.get(position.accountId());
 			Instrument instrument = inputs.instruments().get(position.instrumentId());
 
-			Map.Entry<LocalDate, BigDecimal> price = floor(inputs.pricesByInstrument().get(instrument.getId()), date);
-			BigDecimal close = price == null ? position.avgPriceLocal() : price.getValue();
+			Map.Entry<LocalDate, Price> price = floor(inputs.pricesByInstrument().get(instrument.getId()), date);
+			BigDecimal close = price == null ? position.avgPriceLocal() : price.getValue().getClosePrice();
 			BigDecimal fxRate = fxRateFor(inputs, instrument, position, date);
 			Valuation valuation = HoldingsCalculator.value(position, close, fxRate, instrument.isForeignCurrency());
 
@@ -221,7 +222,7 @@ public final class PortfolioValuator {
 				: position.costKrw().divide(position.costLocal(), HoldingsCalculator.SCALE, RoundingMode.HALF_UP);
 	}
 
-	private static Map.Entry<LocalDate, BigDecimal> floor(NavigableMap<LocalDate, BigDecimal> series, LocalDate date) {
+	private static <T> Map.Entry<LocalDate, T> floor(NavigableMap<LocalDate, T> series, LocalDate date) {
 		return series == null ? null : series.floorEntry(date);
 	}
 }

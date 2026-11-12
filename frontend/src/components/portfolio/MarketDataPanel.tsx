@@ -4,7 +4,10 @@ import { portfolioApi, type SourceStatus } from "../../services/portfolioApi";
 import { formatNumber, parseNumber, todayInSeoul } from "./labels";
 import { ActionButton, EmptyState, Field, FormMessage, NumberInput, Panel, TextInput } from "./fields";
 
-const loadDashboard = () => portfolioApi.getDashboard("1M");
+const loadDashboard = async () => {
+  const [dashboard, instruments] = await Promise.all([portfolioApi.getDashboard("1M"), portfolioApi.getInstruments()]);
+  return { ...dashboard, instruments };
+};
 const loadIntegrations = () => portfolioApi.getIntegrations();
 
 export function MarketDataPanel() {
@@ -18,7 +21,13 @@ export function MarketDataPanel() {
   const [saving, setSaving] = useState(false);
 
   // One row per instrument even when it sits in several accounts.
-  const instruments = [...new Map(dashboard?.holdings.map((holding) => [holding.instrumentId, holding]) ?? []).values()];
+  const holdings = new Map(dashboard?.holdings.map((holding) => [holding.instrumentId, holding]) ?? []);
+  const instruments = dashboard?.instruments.filter((instrument) => instrument.active || holdings.has(instrument.id)).map((instrument) => ({
+    instrumentId: instrument.id, name: instrument.name, symbol: instrument.symbol, tradingCurrency: instrument.tradingCurrency,
+    closePrice: holdings.get(instrument.id)?.closePrice ?? null,
+    priceDate: holdings.get(instrument.id)?.priceDate ?? null,
+    priceStale: holdings.get(instrument.id)?.priceStale ?? false,
+  })) ?? [];
   const currentRates = new Map(dashboard?.freshness.fxRates.map((rate) => [rate.currency, rate]) ?? []);
   const currencies = [...new Set([
     ...instruments.filter((holding) => holding.tradingCurrency !== "KRW").map((holding) => holding.tradingCurrency),
@@ -76,7 +85,7 @@ export function MarketDataPanel() {
             <TextInput type="date" required max={todayInSeoul()} value={date} onChange={(event) => setDate(event.target.value)} />
           </Field>
 
-          {dashboard && instruments.length === 0 ? <EmptyState>보유 중인 종목이 없습니다. 거래 탭에서 먼저 매수·기초잔고를 입력하세요.</EmptyState> : null}
+          {dashboard && instruments.length === 0 ? <EmptyState>종목 탭에서 먼저 종목을 등록하세요. 기초잔고 등록 전에도 시세와 환율을 입력할 수 있습니다.</EmptyState> : null}
           {instruments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] text-left text-sm">
@@ -98,14 +107,14 @@ export function MarketDataPanel() {
                         {formatNumber(holding.closePrice)} {holding.tradingCurrency === "KRW" ? "원" : holding.tradingCurrency}
                       </td>
                       <td className="py-2 pr-3 text-xs">
-                        {holding.priceDate ?? <span className="text-amber-300">시세 없음 (평단으로 평가 중)</span>}
+                        {holding.priceDate ?? <span className="text-amber-300">보유 평가 시세 없음</span>}
                         {holding.priceDate && holding.priceStale ? <span className="ml-1 text-amber-300">오래됨</span> : null}
                       </td>
                       <td className="py-2">
                         <NumberInput
                           aria-label={`${holding.name} 새 종가`}
                           value={prices[holding.instrumentId] ?? ""}
-                          placeholder={String(holding.closePrice)}
+                          placeholder={holding.closePrice == null ? "가격 입력" : String(holding.closePrice)}
                           onChange={(event) => setPrices({ ...prices, [holding.instrumentId]: event.target.value })}
                         />
                       </td>
@@ -124,7 +133,7 @@ export function MarketDataPanel() {
                   <Field
                     key={currency}
                     label={`${currency} 환율 (1${currency}당 원)`}
-                    hint={current ? `현재 ${formatNumber(current.rateToKrw)} (${current.rateDate})` : "아직 환율 없음: 매입 환율로 평가 중"}
+                    hint={current ? `현재 ${formatNumber(current.rateToKrw)} (${current.rateDate})` : "최근 환율을 직접 입력할 수 있습니다"}
                   >
                     <NumberInput value={rates[currency] ?? ""} onChange={(event) => setRates({ ...rates, [currency]: event.target.value })} />
                   </Field>
@@ -160,7 +169,7 @@ function IntegrationLine({ name, status }: { name: string; status?: SourceStatus
     <div className="rounded-md border border-white/10 px-4 py-3 text-sm">
       <p className="flex items-center gap-2 font-medium text-zinc-100">
         <span aria-hidden="true" className={`h-2 w-2 rounded-full ${status?.configured ? "bg-emerald-300" : "bg-zinc-600"}`} />
-        {name}: {status?.configured ? "연결됨" : "키 미설정 (직접 입력)"}
+        {name}: {status?.configured ? "키 설정됨" : "키 미설정 (직접 입력)"}
       </p>
       {status?.lastResult ? (
         <p className="mt-1 text-xs text-zinc-500">

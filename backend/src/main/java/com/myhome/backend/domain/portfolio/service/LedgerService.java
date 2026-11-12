@@ -6,6 +6,9 @@ import com.myhome.backend.domain.portfolio.dto.AccountDtos.ValuationRequest;
 import com.myhome.backend.domain.portfolio.dto.AccountDtos.ValuationResponse;
 import com.myhome.backend.domain.portfolio.dto.InstrumentDtos.InstrumentRequest;
 import com.myhome.backend.domain.portfolio.dto.InstrumentDtos.InstrumentResponse;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.CsvFile;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.CsvRequest;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.ImportResult;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.HoldingsResponse;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.TransactionPage;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.TransactionRequest;
@@ -34,6 +37,14 @@ public interface LedgerService {
 	InstrumentResponse updateInstrument(Long instrumentId, InstrumentRequest request);
 
 	TransactionPage getTransactions(Long accountId, TransactionType type, LocalDate from, LocalDate to, int page, int size);
+
+	CsvFile getTransactionCsvTemplate();
+
+	CsvFile exportTransactionsCsv();
+
+	ImportResult previewTransactionsCsv(CsvRequest request);
+
+	ImportResult importTransactionsCsv(CsvRequest request);
 
 	TransactionResponse createTransaction(TransactionRequest request);
 

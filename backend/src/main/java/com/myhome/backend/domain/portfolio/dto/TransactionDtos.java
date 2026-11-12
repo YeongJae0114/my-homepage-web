@@ -29,7 +29,8 @@ public final class TransactionDtos {
 			@PositiveOrZero BigDecimal amount,
 			@PositiveOrZero BigDecimal fee,
 			@PositiveOrZero BigDecimal tax,
-			@Size(max = 500) String memo
+			@Size(max = 500) String memo,
+			Boolean useLatestPrice
 	) {
 	}
 

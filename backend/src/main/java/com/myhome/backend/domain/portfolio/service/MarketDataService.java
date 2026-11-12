@@ -2,6 +2,7 @@ package com.myhome.backend.domain.portfolio.service;
 
 import com.myhome.backend.domain.portfolio.dto.MarketDataDtos.FxInputRequest;
 import com.myhome.backend.domain.portfolio.dto.MarketDataDtos.IntegrationsResponse;
+import com.myhome.backend.domain.portfolio.dto.MarketDataDtos.OpeningBasis;
 import com.myhome.backend.domain.portfolio.dto.MarketDataDtos.PriceInputRequest;
 import com.myhome.backend.domain.portfolio.dto.MarketDataDtos.SnapshotResponse;
 import com.myhome.backend.domain.portfolio.entity.Instrument;
@@ -19,6 +20,8 @@ public interface MarketDataService {
 	SnapshotResponse captureSnapshot();
 
 	IntegrationsResponse getIntegrations();
+
+	OpeningBasis openingBasis(Instrument instrument);
 
 	/** Held instruments that collectors should price: KIS-sourced, active, quantity > 0. */
 	List<Instrument> collectionTargets(boolean domestic);

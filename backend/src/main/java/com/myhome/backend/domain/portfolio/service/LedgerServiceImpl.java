@@ -16,6 +16,11 @@ import com.myhome.backend.domain.portfolio.dto.AccountDtos.ValuationResponse;
 import com.myhome.backend.domain.portfolio.dto.InstrumentDtos.InstrumentRequest;
 import com.myhome.backend.domain.portfolio.dto.InstrumentDtos.InstrumentResponse;
 import com.myhome.backend.domain.portfolio.dto.PortfolioNumbers;
+import com.myhome.backend.domain.portfolio.dto.MarketDataDtos.OpeningBasis;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.CsvFile;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.CsvRequest;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.ImportResult;
+import com.myhome.backend.domain.portfolio.dto.TransactionCsvDtos.ImportRow;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.AccountBalanceResponse;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.HoldingsResponse;
 import com.myhome.backend.domain.portfolio.dto.TransactionDtos.PositionResponse;
@@ -35,16 +40,25 @@ import com.myhome.backend.domain.portfolio.repository.InstrumentRepository;
 import com.myhome.backend.domain.portfolio.repository.LedgerTransactionRepository;
 import com.myhome.backend.domain.portfolio.repository.ManualValuationRepository;
 import com.myhome.backend.domain.portfolio.service.HoldingsCalculator.LedgerState;
+import com.myhome.backend.domain.portfolio.service.TransactionCsv.Entry;
+import com.myhome.backend.domain.portfolio.service.TransactionCsv.Row;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -66,6 +80,7 @@ public class LedgerServiceImpl implements LedgerService {
 	private static final Set<TransactionType> POSITION_TYPES = Set.of(BUY, SELL, DIVIDEND);
 	private static final Set<TransactionType> TRADE_TYPES = Set.of(BUY, SELL);
 	private static final int MAX_PAGE_SIZE = 200;
+	private static final int CSV_PREVIEW_SIZE = 30;
 	private static final DateTimeFormatter LOCK_FORMAT = DateTimeFormatter.ofPattern("MM-dd HH:mm");
 
 	private final AccountRepository accountRepository;
@@ -73,6 +88,7 @@ public class LedgerServiceImpl implements LedgerService {
 	private final LedgerTransactionRepository transactionRepository;
 	private final ManualValuationRepository valuationRepository;
 	private final SnapshotService snapshotService;
+	private final MarketDataService marketDataService;
 
 	// --- accounts -------------------------------------------------------------------------------------
 
@@ -202,8 +218,119 @@ public class LedgerServiceImpl implements LedgerService {
 	}
 
 	@Override
+	public CsvFile getTransactionCsvTemplate() {
+		return new CsvFile("portfolio-transactions-template.csv", TransactionCsv.write(List.of(), Map.of(), Map.of()));
+	}
+
+	@Override
+	public CsvFile exportTransactionsCsv() {
+		List<Entry> entries = TransactionCsv.entries(transactionRepository.findAllByOrderByTradeDateAscIdAsc());
+		Map<Long, Account> accounts = accountRepository.findAll().stream()
+				.collect(Collectors.toMap(Account::getId, Function.identity()));
+		Map<Long, Instrument> instruments = instrumentRepository.findAll().stream()
+				.collect(Collectors.toMap(Instrument::getId, Function.identity()));
+		return new CsvFile("portfolio-transactions-" + LocalDate.now(ZONE) + ".csv",
+				TransactionCsv.write(entries, accounts, instruments));
+	}
+
+	@Override
+	public ImportResult previewTransactionsCsv(CsvRequest request) {
+		return prepareCsv(TransactionCsv.read(request.content()), accountRepository.findAll()).result();
+	}
+
+	@Override
+	@Transactional
+	public ImportResult importTransactionsCsv(CsvRequest request) {
+		List<Row> rows = TransactionCsv.read(request.content());
+		CsvImport plan = prepareCsv(rows, accountRepository.lockAllForLedgerWrite());
+		transactionRepository.saveAll(plan.additions());
+		return plan.result();
+	}
+
+	private record CsvImport(ImportResult result, List<LedgerTransaction> additions) {
+	}
+
+	private CsvImport prepareCsv(List<Row> rows, List<Account> availableAccounts) {
+		Map<Long, Account> accounts = availableAccounts.stream()
+				.collect(Collectors.toMap(Account::getId, Function.identity()));
+		List<Instrument> availableInstruments = instrumentRepository.findAll();
+		Map<String, Instrument> instruments = availableInstruments.stream()
+				.collect(Collectors.toMap(TransactionCsv::instrumentCode, Function.identity()));
+		Map<Long, Instrument> instrumentsById = availableInstruments.stream()
+				.collect(Collectors.toMap(Instrument::getId, Function.identity()));
+		List<LedgerTransaction> existing = transactionRepository.findAllByOrderByTradeDateAscIdAsc();
+		Map<List<String>, Integer> remainingMatches = new HashMap<>();
+		TransactionCsv.entries(existing).forEach(entry -> remainingMatches.merge(entry.key(), 1, Integer::sum));
+
+		List<ImportRow> preview = new ArrayList<>();
+		List<LedgerTransaction> additions = new ArrayList<>();
+		int duplicateRows = 0;
+		for (Row row : rows) {
+			Entry entry = csvEntry(row, accounts, instruments);
+			List<String> key = entry.key();
+			int matches = remainingMatches.getOrDefault(key, 0);
+			boolean duplicate = matches > 0;
+			if (duplicate) {
+				remainingMatches.put(key, matches - 1);
+				duplicateRows++;
+			} else {
+				additions.addAll(entry.legs());
+			}
+			if (preview.size() < CSV_PREVIEW_SIZE) {
+				LedgerTransaction trade = entry.trade();
+				Instrument instrument = instrumentsById.get(trade.getInstrumentId());
+				String toAccount = entry.incoming() == null ? null : accounts.get(entry.incoming().getAccountId()).getName();
+				preview.add(new ImportRow(row.line(), trade.getTradeDate(), accounts.get(trade.getAccountId()).getName(),
+						entry.label(), instrument == null ? null : instrument.getName(),
+						trade.getAmount().stripTrailingZeros().toPlainString(), toAccount, duplicate));
+			}
+		}
+		verifyCsvAdditions(existing, additions, accounts);
+		return new CsvImport(new ImportResult(rows.size() - duplicateRows, duplicateRows, preview), additions);
+	}
+
+	private Entry csvEntry(Row row, Map<Long, Account> accounts, Map<String, Instrument> instruments) {
+		TransactionRequest transaction = row.transfer() ? null : row.transactionRequest(accounts, instruments);
+		TransferRequest transfer = transaction == null ? row.transferRequest(accounts) : null;
+		Entry entry;
+		try {
+			entry = transaction == null ? toTransfer(transfer) : new Entry(toTransaction(transaction), null);
+		} catch (LedgerValidationException exception) {
+			throw row.error(exception.getMessage());
+		}
+		if (entry.trade().getAmount().precision() > 17) {
+			throw row.error("정산금액이 저장할 수 있는 범위를 초과합니다");
+		}
+		return entry;
+	}
+
+	private static void verifyCsvAdditions(List<LedgerTransaction> existing, List<LedgerTransaction> additions,
+			Map<Long, Account> accounts) {
+		Map<Long, List<LedgerTransaction>> books = new LinkedHashMap<>();
+		additions.forEach(trade -> books.computeIfAbsent(trade.getAccountId(), accountId -> new ArrayList<>()));
+		for (LedgerTransaction trade : existing) {
+			List<LedgerTransaction> book = books.get(trade.getAccountId());
+			if (book != null) {
+				book.add(trade);
+			}
+		}
+		additions.forEach(trade -> books.get(trade.getAccountId()).add(trade));
+		books.forEach((accountId, book) -> {
+			// Existing entries stay ahead of newly inserted rows on the same trade date.
+			book.sort(Comparator.comparing(LedgerTransaction::getTradeDate));
+			try {
+				HoldingsCalculator.replay(book);
+			} catch (LedgerValidationException exception) {
+				throw new LedgerValidationException("%s 계좌의 CSV를 확인하세요. %s"
+						.formatted(accounts.get(accountId).getName(), exception.getMessage()));
+			}
+		});
+	}
+
+	@Override
 	@Transactional
 	public TransactionResponse createTransaction(TransactionRequest request) {
+		accountRepository.lockAllForLedgerWrite();
 		LedgerTransaction saved = transactionRepository.save(toTransaction(request));
 		verifyLedger(saved.getAccountId());
 		return TransactionResponse.from(saved, null);
@@ -212,6 +339,7 @@ public class LedgerServiceImpl implements LedgerService {
 	@Override
 	@Transactional
 	public TransactionResponse updateTransaction(Long transactionId, TransactionRequest request) {
+		accountRepository.lockAllForLedgerWrite();
 		LedgerTransaction transaction = findTransaction(transactionId);
 		ensureEditable(transaction.getCreatedAt(), "거래는");
 		if (transaction.getTransferGroupId() != null) {
@@ -231,6 +359,7 @@ public class LedgerServiceImpl implements LedgerService {
 	@Override
 	@Transactional
 	public void deleteTransaction(Long transactionId) {
+		accountRepository.lockAllForLedgerWrite();
 		LedgerTransaction transaction = findTransaction(transactionId);
 		List<LedgerTransaction> removed = transaction.getTransferGroupId() == null
 				? List.of(transaction)
@@ -244,6 +373,12 @@ public class LedgerServiceImpl implements LedgerService {
 	@Override
 	@Transactional
 	public List<TransactionResponse> createTransfer(TransferRequest request) {
+		accountRepository.lockAllForLedgerWrite();
+		return transactionRepository.saveAll(toTransfer(request).legs()).stream()
+				.map(leg -> TransactionResponse.from(leg, null)).toList();
+	}
+
+	private Entry toTransfer(TransferRequest request) {
 		if (request.fromAccountId().equals(request.toAccountId())) {
 			throw new LedgerValidationException("출금 계좌와 입금 계좌가 같습니다");
 		}
@@ -256,10 +391,9 @@ public class LedgerServiceImpl implements LedgerService {
 
 		UUID groupId = UUID.randomUUID();
 		BigDecimal amount = krw(request.amount());
-		List<LedgerTransaction> legs = transactionRepository.saveAll(List.of(
+		return new Entry(
 				transferLeg(TRANSFER_OUT, from.getId(), request, amount, groupId),
-				transferLeg(TRANSFER_IN, to.getId(), request, amount, groupId)));
-		return legs.stream().map(leg -> TransactionResponse.from(leg, null)).toList();
+				transferLeg(TRANSFER_IN, to.getId(), request, amount, groupId));
 	}
 
 	@Override
@@ -326,8 +460,23 @@ public class LedgerServiceImpl implements LedgerService {
 		}
 
 		boolean priced = TRADE_TYPES.contains(type) || (type == OPENING && instrument != null);
+		BigDecimal price = request.price();
 		BigDecimal fxRate = BigDecimal.ONE;
-		if (priced) {
+		String memo = request.memo();
+		if (Boolean.TRUE.equals(request.useLatestPrice())) {
+			if (type != OPENING || instrument == null || !request.tradeDate().equals(LocalDate.now(ZONE)) || request.quantity() == null) {
+				throw new LedgerValidationException("자동 기준가는 오늘 날짜의 보유 종목 기초잔고에만 사용할 수 있습니다");
+			}
+			if (request.price() != null || request.fxRate() != null || request.amount() != null
+					|| (request.fee() != null && request.fee().signum() != 0) || (request.tax() != null && request.tax().signum() != 0)) {
+				throw new LedgerValidationException("자동 기준가 사용 시 가격·환율·정산금액·수수료·세금은 비워 주세요");
+			}
+			OpeningBasis basis = marketDataService.openingBasis(instrument);
+			price = basis.price();
+			fxRate = basis.fxRate();
+			memo = "[시작 기준가] " + (memo == null ? "" : memo);
+			if (memo.length() > 500) throw new LedgerValidationException("자동 기준가 등록 시 메모는 480자 이내로 입력하세요");
+		} else if (priced) {
 			if (request.quantity() == null || request.price() == null) {
 				throw new LedgerValidationException("수량과 가격을 입력하세요");
 			}
@@ -343,7 +492,7 @@ public class LedgerServiceImpl implements LedgerService {
 		BigDecimal tax = request.tax() == null ? BigDecimal.ZERO : krw(request.tax());
 		BigDecimal amount = request.amount() != null
 				? krw(request.amount())
-				: computeAmount(type, priced, request.quantity(), request.price(), fxRate, fee, tax);
+				: computeAmount(type, priced, request.quantity(), price, fxRate, fee, tax);
 
 		if (amount.signum() < 0) {
 			throw new LedgerValidationException("정산금액이 음수입니다. 수수료·세금을 확인하세요");
@@ -358,12 +507,12 @@ public class LedgerServiceImpl implements LedgerService {
 				.tradeDate(request.tradeDate())
 				.instrumentId(instrument == null ? null : instrument.getId())
 				.quantity(priced ? request.quantity() : null)
-				.price(priced ? request.price() : null)
+				.price(priced ? price : null)
 				.fxRate(fxRate)
 				.amount(amount)
 				.fee(fee)
 				.tax(tax)
-				.memo(request.memo())
+				.memo(memo)
 				.build();
 	}
 
