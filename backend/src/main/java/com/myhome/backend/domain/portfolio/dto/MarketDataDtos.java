@@ -16,6 +16,10 @@ public final class MarketDataDtos {
 	private MarketDataDtos() {
 	}
 
+	/** Reference values for tracking from registration, not the historical acquisition cost. */
+	public record OpeningBasis(BigDecimal price, BigDecimal fxRate) {
+	}
+
 	/** Manual close prices for one date (trading currency). Manual rows win over collected ones. */
 	public record PriceInputRequest(@NotNull LocalDate date, @NotEmpty List<@Valid PriceItem> items) {
 	}

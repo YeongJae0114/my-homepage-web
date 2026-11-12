@@ -4,12 +4,13 @@ import com.myhome.backend.domain.portfolio.client.IntegrationStatus;
 import com.myhome.backend.domain.portfolio.client.KeximFxClient;
 import com.myhome.backend.domain.portfolio.client.KisClient;
 import com.myhome.backend.domain.portfolio.entity.Instrument;
+import com.myhome.backend.domain.portfolio.entity.Instrument.Market;
 import com.myhome.backend.domain.portfolio.service.MarketDataService;
+import com.myhome.backend.domain.portfolio.service.PortfolioMarketHours;
 import com.myhome.backend.domain.portfolio.service.SnapshotService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,6 @@ public class PortfolioCollectScheduler {
 	private static final String SEOUL = "Asia/Seoul";
 	private static final ZoneId SEOUL_ZONE = ZoneId.of(SEOUL);
 	private static final ZoneId NEW_YORK_ZONE = ZoneId.of("America/New_York");
-	private static final LocalTime KRX_CLOSE = LocalTime.of(15, 30);
 	private static final long CALL_INTERVAL_MILLIS = 100; // stays well under KIS per-second limits
 
 	private final KisClient kisClient;
@@ -43,14 +43,29 @@ public class PortfolioCollectScheduler {
 	private final IntegrationStatus integrationStatus;
 	private final Set<String> warnedUnconfigured = ConcurrentHashMap.newKeySet();
 
-	/** KRX session every 15 minutes; runs from 15:30 on finalize the day's close. */
-	@Scheduled(cron = "${portfolio.schedule.kr-prices:0 */15 9-15 * * MON-FRI}", zone = SEOUL)
+	/** Every five minutes, through ten minutes after the regular close. */
+	@Scheduled(cron = "${portfolio.schedule.kr-prices:0 */5 9-15 * * MON-FRI}", zone = SEOUL)
 	public void collectDomesticPrices() {
 		if (!ready(IntegrationStatus.KIS, kisClient.isConfigured())) {
 			return;
 		}
-		LocalDateTime now = LocalDateTime.now(SEOUL_ZONE);
-		collectPrices(true, now.toLocalDate(), !now.toLocalTime().isBefore(KRX_CLOSE));
+		collectSession(Market.KRX, ZonedDateTime.now(SEOUL_ZONE));
+	}
+
+	/** New York time handles daylight saving; only NASDAQ/NYSE/AMEX instruments are supported. */
+	@Scheduled(cron = "${portfolio.schedule.us-intraday:0 */5 9-16 * * MON-FRI}", zone = "America/New_York")
+	public void collectUsIntradayPrices() {
+		if (!ready(IntegrationStatus.KIS, kisClient.isConfigured())) {
+			return;
+		}
+		collectSession(Market.NASDAQ, ZonedDateTime.now(NEW_YORK_ZONE));
+	}
+
+	void collectSession(Market market, ZonedDateTime now) {
+		if (PortfolioMarketHours.collectionDue(market, now)) {
+			collectPrices(market == Market.KRX, now.withZoneSameInstant(PortfolioMarketHours.zone(market)).toLocalDate(),
+					PortfolioMarketHours.afterClose(market, now));
+		}
 	}
 
 	/** 07:00 KST Tue-Sat = after the US close of Mon-Fri; stored under the US trading date. */
@@ -124,7 +139,7 @@ public class PortfolioCollectScheduler {
 			} catch (RuntimeException exception) {
 				// One failing symbol must not stop the rest; its last price stays and shows as stale.
 				failed++;
-				log.warn("KIS price failed for {}: {}", instrument.getSymbol(), exception.getMessage());
+				log.warn("KIS {} quote request failed ({})", domestic ? "domestic" : "US", exception.getClass().getSimpleName());
 			}
 			pause();
 		}

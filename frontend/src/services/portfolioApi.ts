@@ -78,6 +78,7 @@ export type TransactionInput = {
   fee: number | null;
   tax: number | null;
   memo: string | null;
+  useLatestPrice?: boolean;
 };
 export type Transaction = TransactionInput & {
   id: number;
@@ -88,6 +89,21 @@ export type Transaction = TransactionInput & {
   editable: boolean;
 };
 export type TransactionPage = { items: Transaction[]; page: number; size: number; totalElements: number };
+export type TransactionCsvFile = { filename: string; content: string };
+export type TransactionCsvImport = {
+  newRows: number;
+  duplicateRows: number;
+  rows: {
+    line: number;
+    tradeDate: string;
+    account: string;
+    type: string;
+    instrument: string | null;
+    amount: string;
+    toAccount: string | null;
+    duplicate: boolean;
+  }[];
+};
 export type TransferInput = { fromAccountId: number; toAccountId: number; tradeDate: string; amount: number; memo: string | null };
 
 export type Holding = {
@@ -103,6 +119,8 @@ export type Holding = {
   closePrice: number;
   priceDate: string | null;
   priceStale: boolean;
+  priceSource: "KIS" | "MANUAL" | null;
+  priceCollectedAt: string | null;
   marketValueKrw: number;
   costKrw: number;
   unrealizedProfit: number;
@@ -113,6 +131,13 @@ export type Holding = {
 };
 export type ExposureItem = { key: string; amount: number; weightPercent: number | null };
 export type HistoryRange = "1M" | "3M" | "6M" | "1Y" | "ALL";
+export type PeriodChange = {
+  baseDate: string;
+  netWorthChange: number;
+  investmentChange: number;
+  netContribution: number;
+  investmentGain: number;
+};
 export type Dashboard = {
   summary: {
     totalAssets: number;
@@ -120,6 +145,8 @@ export type Dashboard = {
     netWorth: number;
     monthOverMonthChange: number | null;
     monthOverMonthRate: number | null;
+    dayChange: PeriodChange | null;
+    monthChange: PeriodChange | null;
   };
   performance: {
     xirr: number | null;
@@ -149,8 +176,10 @@ export type Dashboard = {
     oldestPriceDate: string | null;
     latestPriceDate: string | null;
     staleHoldings: number;
+    latestCollectedAt: string | null;
     fxRates: { currency: string; rateToKrw: number; rateDate: string }[];
   };
+  calculatedAt: string;
 };
 export type SourceStatus = { configured: boolean; lastRunAt: string | null; lastResult: string | null };
 export type Integrations = { kis: SourceStatus; kexim: SourceStatus };
@@ -179,6 +208,12 @@ export const portfolioApi = {
     query.set("size", String(params.size ?? 50));
     return fetchJson<TransactionPage>(`/portfolio/transactions?${query}`);
   },
+  getTransactionCsvTemplate: () => fetchJson<TransactionCsvFile>("/portfolio/transactions/csv/template"),
+  exportTransactionsCsv: () => fetchJson<TransactionCsvFile>("/portfolio/transactions/csv/export"),
+  previewTransactionsCsv: (content: string) =>
+    fetchJson<TransactionCsvImport>("/portfolio/transactions/csv/preview", json("POST", { content })),
+  importTransactionsCsv: (content: string) =>
+    fetchJson<TransactionCsvImport>("/portfolio/transactions/csv/import", json("POST", { content })),
   createTransaction: (input: TransactionInput) => fetchJson<Transaction>("/portfolio/transactions", json("POST", input)),
   updateTransaction: (id: number, input: TransactionInput) =>
     fetchJson<Transaction>(`/portfolio/transactions/${id}`, json("PUT", input)),

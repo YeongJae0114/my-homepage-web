@@ -10,5 +10,7 @@ public interface PriceRepository extends JpaRepository<Price, Long> {
 
 	Optional<Price> findByInstrumentIdAndPriceDate(Long instrumentId, LocalDate priceDate);
 
+	Optional<Price> findTopByInstrumentIdAndPriceDateLessThanEqualOrderByPriceDateDesc(Long instrumentId, LocalDate date);
+
 	boolean existsByCapturedAtAfter(LocalDateTime capturedAt);
 }

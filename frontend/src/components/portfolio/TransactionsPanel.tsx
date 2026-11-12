@@ -12,6 +12,7 @@ import {
   transactionTypeLabels,
 } from "./labels";
 import { ActionButton, EmptyState, Field, FormMessage, NumberInput, Panel, SelectInput, TextInput } from "./fields";
+import { TransactionCsvPanel } from "./TransactionCsvPanel";
 
 const loadAccounts = () => portfolioApi.getAccounts();
 const loadInstruments = () => portfolioApi.getInstruments();
@@ -30,6 +31,7 @@ type TxForm = {
   fee: string;
   tax: string;
   memo: string;
+  useLatestPrice: boolean;
 };
 
 const blankForm = (accountId = ""): TxForm => ({
@@ -45,6 +47,7 @@ const blankForm = (accountId = ""): TxForm => ({
   fee: "",
   tax: "",
   memo: "",
+  useLatestPrice: true,
 });
 
 const LOCK_HINT = "다음 스냅샷(평일 18:00)에 반영되어 잠겼습니다. 정정은 반대 거래(예: 매수↔매도, 입금↔출금)로 입력하세요.";
@@ -68,7 +71,7 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
   const [mode, setMode] = useState<"single" | "transfer">("single");
   const [form, setForm] = useState<TxForm>(() => blankForm(initialAccountId ? String(initialAccountId) : ""));
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [keepEntering, setKeepEntering] = useState(true);
+  const [keepEntering, setKeepEntering] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ error?: string; success?: string }>({});
   const [saving, setSaving] = useState(false);
@@ -84,17 +87,8 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
   const instrument = instrumentById.get(Number(form.instrumentId));
   const foreign = !!instrument && instrument.tradingCurrency !== "KRW";
 
-  // Same rule as the backend when the amount is left empty: qty x price x fx (+ fee for buys, - fee - tax for sells).
-  const preview = useMemo(() => {
-    const quantity = parseNumber(form.quantity);
-    const price = parseNumber(form.price);
-    const fx = foreign ? parseNumber(form.fxRate) : 1;
-    if (!priced || quantity == null || price == null || fx == null) return null;
-    const gross = quantity * price * fx;
-    const fee = parseNumber(form.fee) ?? 0;
-    const tax = parseNumber(form.tax) ?? 0;
-    return Math.round(type === "BUY" ? gross + fee : type === "SELL" ? gross - fee - tax : gross);
-  }, [form.quantity, form.price, form.fxRate, form.fee, form.tax, foreign, priced, type]);
+  const automaticOpening = !editingId && type === "OPENING" && positionEntry
+    && form.tradeDate === todayInSeoul() && form.useLatestPrice;
 
   useEffect(() => {
     if (initialAccountId) {
@@ -125,6 +119,7 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
       fee: transaction.fee ? transaction.fee.toString() : "",
       tax: transaction.tax ? transaction.tax.toString() : "",
       memo: transaction.memo ?? "",
+      useLatestPrice: false,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -146,12 +141,13 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
       tradeDate: form.tradeDate,
       instrumentId: positionEntry && form.instrumentId ? Number(form.instrumentId) : null,
       quantity: priced ? parseNumber(form.quantity) : null,
-      price: priced ? parseNumber(form.price) : null,
-      fxRate: priced && foreign ? parseNumber(form.fxRate) : null,
-      amount: parseNumber(form.amount),
-      fee: parseNumber(form.fee),
-      tax: parseNumber(form.tax),
+      price: priced && !automaticOpening ? parseNumber(form.price) : null,
+      fxRate: priced && foreign && !automaticOpening ? parseNumber(form.fxRate) : null,
+      amount: automaticOpening ? null : parseNumber(form.amount),
+      fee: automaticOpening ? null : parseNumber(form.fee),
+      tax: automaticOpening ? null : parseNumber(form.tax),
       memo: form.memo || null,
+      useLatestPrice: automaticOpening,
     };
 
     setSaving(true);
@@ -198,7 +194,7 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
     <div className="grid gap-6">
       <Panel
         title={editingId ? "거래 수정" : "거래 입력"}
-        description="스냅샷(평일 18:00) 전까지는 입력한 거래를 수정·삭제할 수 있습니다. 과거 날짜 거래도 입력할 수 있으며 다음 스냅샷부터 반영됩니다."
+        description="매매·입출금이 생기면 한 건씩 기록하세요. 저장 즉시 수량과 잔액에 반영됩니다. 스냅샷(평일 18:00)에 반영되기 전에는 아래 내역에서 수정·삭제할 수 있습니다."
         actions={
           editingId ? null : (
             <div className="flex rounded-md border border-white/10 p-0.5 text-sm">
@@ -248,12 +244,22 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
                 {type === "OPENING" && account?.investment ? (
                   <Field label="기초잔고 종류">
                     <SelectInput value={form.openingKind} onChange={(event) => update("openingKind", event.target.value as TxForm["openingKind"])}>
-                      <option value="position">보유 종목 (수량·평단)</option>
+                      <option value="position">보유 종목</option>
                       <option value="cash">예수금 (현금)</option>
                     </SelectInput>
                   </Field>
                 ) : null}
               </div>
+
+              {type === "OPENING" && positionEntry && !editingId && form.tradeDate === todayInSeoul() ? (
+                <div className="rounded-md border border-white/10 p-3 text-sm text-zinc-300">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={form.useLatestPrice} onChange={(event) => update("useLatestPrice", event.target.checked)} />
+                    최근 시세를 시작 기준가로 사용
+                  </label>
+                  <p className="mt-2 text-xs text-zinc-400">종목과 수량만 입력하면 저장된 최근 시세·환율을 사용합니다. 시세가 없으면 API로 조회합니다. 과거 매입 손익은 포함하지 않고 이 기준가 이후의 변화를 추적합니다. 직접 입력하려면 선택을 해제하세요.</p>
+                </div>
+              ) : null}
 
               {account?.accountType === "INSURANCE" ? (
                 <p className="text-sm text-zinc-400">보험은 거래가 아니라 계좌 탭의 '해약환급금 입력'으로 기록합니다.</p>
@@ -281,10 +287,10 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
                       <Field label="수량" error={fieldErrors.quantity}>
                         <NumberInput required value={form.quantity} onChange={(event) => update("quantity", event.target.value)} />
                       </Field>
-                      <Field label={`${type === "OPENING" ? "평균단가" : "체결가"}${foreign ? ` (${instrument?.tradingCurrency})` : " (원)"}`} error={fieldErrors.price}>
+                      {!automaticOpening ? <Field label={`${type === "OPENING" ? "평단 또는 시작 기준가" : "체결가"}${foreign ? ` (${instrument?.tradingCurrency})` : " (원)"}`} hint={type === "OPENING" ? "매입 평단을 모르면 오늘 가격으로 시작할 수 있습니다" : undefined} error={fieldErrors.price}>
                         <NumberInput required value={form.price} onChange={(event) => update("price", event.target.value)} />
-                      </Field>
-                      {foreign ? (
+                      </Field> : null}
+                      {foreign && !automaticOpening ? (
                         <Field label={type === "OPENING" ? "매입 평균 환율" : "체결 환율"} hint="1달러당 원" error={fieldErrors.fxRate}>
                           <NumberInput required value={form.fxRate} placeholder="1,380" onChange={(event) => update("fxRate", event.target.value)} />
                         </Field>
@@ -301,15 +307,15 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
                       <NumberInput value={form.tax} placeholder="0" onChange={(event) => update("tax", event.target.value)} />
                     </Field>
                   ) : null}
-                  <Field
+                  {!automaticOpening ? <Field
                     label={priced ? "정산금액 (선택)" : type === "DIVIDEND" ? "입금액 (세후, 원)" : "금액 (원)"}
-                    hint={priced ? `비우면 자동 계산: ${formatKrw(preview)}. 증권사 정산금액과 다를 때만 입력` : undefined}
+                    hint={priced ? "비우면 서버에서 수량·가격·환율로 계산합니다. 증권사 정산금액이 있으면 입력하세요" : undefined}
                     error={fieldErrors.amount}
                   >
                     <NumberInput required={!priced} value={form.amount} onChange={(event) => update("amount", event.target.value)} />
-                  </Field>
+                  </Field> : null}
                   <Field label="메모" className="sm:col-span-2">
-                    <TextInput value={form.memo} maxLength={500} onChange={(event) => update("memo", event.target.value)} />
+                    <TextInput value={form.memo} maxLength={automaticOpening ? 480 : 500} onChange={(event) => update("memo", event.target.value)} />
                   </Field>
                 </div>
               ) : null}
@@ -333,6 +339,8 @@ export function TransactionsPanel({ initialAccountId }: TransactionsPanelProps) 
           )}
         </div>
       </Panel>
+
+      <TransactionCsvPanel accounts={accounts ?? []} instruments={instruments ?? []} onImported={reload} />
 
       <Panel
         title="거래 내역"
